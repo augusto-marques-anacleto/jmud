@@ -1,0 +1,210 @@
+<resources>
+    <string name="app_name" translatable="false">jMud</string>
+
+    <string name="main_top_bar_title" translatable="false">%1$s - %2$s</string>
+    <string name="tab_game">Jogo</string>
+    <string name="tab_characters">Personagens</string>
+    <string name="tab_triggers">Triggers</string>
+    <string name="tab_timers">Temporizadores</string>
+    <string name="tab_settings">Configurações</string>
+
+    <string name="action_add">Adicionar</string>
+    <string name="action_edit">Editar</string>
+    <string name="action_remove">Remover</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_save">Salvar</string>
+    <string name="action_connect">Conectar</string>
+    <string name="action_send">Enviar</string>
+    <string name="clear_history">Limpar histórico</string>
+    <string name="action_back">Voltar</string>
+    <string name="action_disconnect">Desconectar</string>
+    <string name="action_reconnect">Reconectar</string>
+    <string name="action_choose">Escolher</string>
+
+    <string name="manual_connection">Conexão Manual</string>
+    <string name="no_characters_saved">Nenhum personagem salvo.</string>
+    <string name="character_options_title">Opções: %1$s</string>
+    <string name="add_character_title">Adicionar Personagem</string>
+    <string name="edit_character_title">Editar Personagem</string>
+    <string name="field_name">Nome</string>
+    <string name="field_password">Senha</string>
+    <string name="field_host">Servidor</string>
+    <string name="field_port">Porta</string>
+    <string name="auto_login">Login automático</string>
+    <string name="post_connect_commands">Comandos Pós-Conexão</string>
+    <string name="use_tts">Usar Sintetizador</string>
+    <string name="play_sounds">Tocar Sons</string>
+    <string name="play_sounds_default_folder">Tocar Sons (Pasta: Sons)</string>
+    <string name="sounds_folder_value">Pasta de Sons: %1$s</string>
+    <string name="sounds_folder_none">Nenhuma</string>
+    <string name="choose_folder">Escolher Pasta</string>
+    <string name="choose_sounds_folder_title">Escolher Pasta de Sons</string>
+    <string name="no_folders_found">Nenhuma pasta encontrada.</string>
+    <string name="create_new_folder">Criar Nova Pasta</string>
+    <string name="new_folder_title">Nome da Nova Pasta</string>
+    <string name="field_folder_name">Nome da Pasta</string>
+    <string name="create_and_select">Criar e Selecionar</string>
+    <string name="edit_item">Editar %1$s</string>
+    <string name="remove_item">Remover %1$s</string>
+
+    <string name="game_title">Jogando com: %1$s</string>
+    <string name="unknown_character">Desconhecido</string>
+    <string name="tts_short">Sintetizador</string>
+    <string name="sounds_short">Sons</string>
+    <string name="scroll_to_end">Rolar para o final</string>
+    <string name="field_command">Comando</string>
+    <string name="attention_title">Atenção</string>
+    <string name="disconnect_confirm_message">A conexão está ativa. Deseja realmente voltar e encerrar a conexão?</string>
+    <string name="confirm_disconnect">Sim, encerrar</string>
+    <string name="connection_closed_title">Conexão encerrada</string>
+    <string name="reconnect_question">Você não está conectado. Deseja reconectar?</string>
+    <string name="back_to_home">Voltar para a tela inicial</string>
+    <string name="stay_in_history">Permanecer no histórico</string>
+
+    <string name="settings_connection">Conexão</string>
+    <string name="settings_encoding">Codificação de caracteres</string>
+    <string name="encoding_iso">ISO-8859-1 (padrão dos MUDs)</string>
+    <string name="encoding_utf8" translatable="false">UTF-8</string>
+    <string name="settings_tts">Sintetizador de voz</string>
+    <string name="tts_engine_value">Mecanismo de fala: %1$s</string>
+    <string name="tts_engine_title">Mecanismo de fala</string>
+    <string name="system_default">Padrão do sistema</string>
+    <string name="tts_voice_value">Voz: %1$s</string>
+    <string name="tts_voice_title">Voz</string>
+    <string name="default_option">Padrão</string>
+    <string name="no_voices_available">Nenhuma voz disponível. Se você acabou de trocar o mecanismo, feche e abra este diálogo novamente.</string>
+    <string name="tts_rate">Velocidade da fala</string>
+    <string name="tts_pitch">Tom da voz</string>
+    <string name="tts_volume">Volume da fala</string>
+    <string name="use_system_rate_pitch">Usar velocidade e tom do sistema</string>
+    <string name="test_voice">Testar voz</string>
+    <string name="test_voice_message">Esta é a voz configurada do %1$s.</string>
+    <string name="settings_backup">Backup</string>
+    <string name="backup_description">O backup inclui personagens, triggers, temporizadores e configurações.</string>
+    <string name="backup_export">Exportar backup</string>
+    <string name="backup_import">Importar backup</string>
+    <string name="backup_import_warning">Importar um backup substituirá seus personagens, triggers, temporizadores e configurações atuais. Deseja continuar?</string>
+    <string name="backup_import_confirm">Sim, escolher arquivo</string>
+    <string name="backup_export_ok">Backup exportado com sucesso.</string>
+    <string name="backup_export_failed">Não foi possível exportar o backup.</string>
+    <string name="backup_import_ok">Backup importado com sucesso.</string>
+    <string name="backup_import_failed">Não foi possível importar o backup. Verifique se o arquivo é um backup válido do jMud.</string>
+    <string name="settings_updates">Atualizações</string>
+    <string name="installed_version">Versão instalada: %1$s</string>
+    <string name="check_updates">Verificar atualização</string>
+    <string name="update_available_title">Atualização disponível</string>
+    <string name="update_available_message">Nova versão %1$s disponível.\n\nNovidades: %2$s\n\nDeseja baixar e instalar agora?</string>
+    <string name="update_download_install">Baixar e instalar</string>
+    <string name="update_not_now">Agora não</string>
+    <string name="update_downloading">Baixando atualização: %1$d%%</string>
+    <string name="update_none">Você já está na versão mais recente.</string>
+    <string name="update_failed">Não foi possível baixar a atualização. Tente novamente mais tarde.</string>
+    <string name="settings_logs">Logs</string>
+    <string name="save_session_logs">Salvar logs das sessões</string>
+    <string name="log_retention_value">Excluir logs antigos após: %1$s</string>
+    <string name="log_retention_title">Excluir logs antigos após</string>
+    <string name="retention_never">Nunca</string>
+    <string name="retention_never_delete">Nunca excluir</string>
+    <plurals name="retention_days">
+        <item quantity="one">%d dia</item>
+        <item quantity="other">%d dias</item>
+    </plurals>
+    <string name="labeled_value" translatable="false">%1$s: %2$s</string>
+    <string name="times_format" translatable="false">%1$s x</string>
+    <string name="percent_format" translatable="false">%1$d%%</string>
+    <string name="switch_on">ativado</string>
+    <string name="switch_off">desativado</string>
+
+    <string name="add_timer">Adicionar Temporizador</string>
+    <string name="edit_timer_title">Editar Temporizador</string>
+    <string name="no_timers_saved">Nenhum temporizador salvo.</string>
+    <string name="timer_options_title">Opções do temporizador</string>
+    <string name="edit_timer">Editar temporizador</string>
+    <string name="remove_timer">Remover temporizador</string>
+    <string name="field_seconds">Tempo em segundos</string>
+    <string name="min_time_error">O tempo mínimo é 1 segundo.</string>
+    <string name="field_timer_commands">Comandos (um por linha)</string>
+    <string name="scope_type_value">Tipo de escopo: %1$s</string>
+    <string name="scope_type_title">Tipo de escopo</string>
+    <string name="scope_all">Em toda conexão</string>
+    <string name="scope_mud">Só em um MUD</string>
+    <string name="scope_character">Só em um personagem</string>
+    <string name="server_value">Servidor: %1$s</string>
+    <string name="character_value">Personagem: %1$s</string>
+    <string name="timer_enabled">Ativo</string>
+    <string name="choose_server_title">Escolher servidor</string>
+    <string name="choose_character_title">Escolher personagem</string>
+    <string name="no_servers_saved">Nenhum servidor salvo. Cadastre um personagem primeiro.</string>
+    <string name="no_characters_registered">Nenhum personagem salvo. Cadastre um personagem primeiro.</string>
+    <plurals name="timer_every_seconds">
+        <item quantity="one">A cada %1$d segundo: %2$s, %3$s</item>
+        <item quantity="other">A cada %1$d segundos: %2$s, %3$s</item>
+    </plurals>
+    <string name="timer_scope_all_desc">em toda conexão</string>
+    <string name="timer_scope_mud_desc">no MUD %1$s</string>
+    <string name="timer_scope_character_desc">no personagem %1$s</string>
+    <string name="timer_scope_removed_character">em personagem removido</string>
+    <string name="timer_disabled_suffix">" (desativado)"</string>
+
+    <string name="add_trigger">Adicionar Trigger</string>
+    <string name="edit_trigger_title">Editar Trigger</string>
+    <string name="no_triggers_saved">Nenhuma trigger salva.</string>
+    <string name="field_trigger_message">Mensagem</string>
+    <string name="match_type_value">Tipo de busca: %1$s</string>
+    <string name="match_type_title">Tipo de busca</string>
+    <string name="match_start">Busca no início</string>
+    <string name="match_contains">Busca no meio</string>
+    <string name="match_end">Busca no fim</string>
+    <string name="match_exact">Texto completo</string>
+    <string name="match_pattern">Padrão com coringas</string>
+    <string name="trigger_enabled">Ativa</string>
+    <string name="trigger_ignore_line">Ignorar no histórico</string>
+    <string name="field_history_name">Nome de histórico</string>
+    <string name="field_sound_name">Nome de som</string>
+    <string name="histories_title">Históricos</string>
+    <string name="no_histories">Nenhum histórico criado.</string>
+    <string name="show_histories_label">ver os históricos</string>
+    <string name="action_close">Fechar</string>
+    <string name="triggers_enabled_switch">Triggers ativadas</string>
+    <string name="timers_enabled_switch">Temporizadores ativados</string>
+    <string name="trigger_description" translatable="false">%1$s — %2$s: %3$s, %4$s</string>
+    <string name="trigger_disabled_suffix">" (desativada)"</string>
+
+    <string name="open_link_title">Abrir link</string>
+    <string name="open_link_question">Deseja abrir este link no navegador?</string>
+    <string name="action_open">Abrir</string>
+    <string name="open_link_click_label">abrir o link</string>
+
+    <string name="more_options">Mais opções</string>
+    <string name="download_sound_pack">Baixar pacote de sons</string>
+    <string name="import_zip_pack">Importar pacote ZIP</string>
+    <string name="field_link">Link</string>
+    <string name="destination_folder_value">Pasta de destino: %1$s</string>
+    <string name="action_download">Baixar</string>
+    <string name="choose_zip_and_import">Escolher arquivo e importar</string>
+    <string name="installing_sound_pack">Instalando pacote de sons</string>
+    <string name="step_downloading">Baixando</string>
+    <string name="step_extracting">Descompactando</string>
+    <string name="action_background">Segundo plano</string>
+    <string name="progress_status" translatable="false">%1$s: %2$d%%. %3$s</string>
+    <string name="download_speed_detail">%1$s MB/s, restante: %2$s</string>
+    <string name="downloaded_mb">%1$s MB baixados</string>
+    <string name="eta_format" translatable="false">%1$dm %2$ds</string>
+    <string name="file_progress">Arquivo %1$d de %2$d</string>
+    <string name="sound_pack_installed">Pacote de sons instalado na pasta %1$s.</string>
+    <string name="sound_pack_failed">Não foi possível instalar o pacote de sons.</string>
+    <string name="sound_pack_cancelled">Instalação do pacote de sons cancelada.</string>
+    <string name="invalid_link">Link inválido.</string>
+
+    <string name="connecting_to">Conectando a %1$s:%2$d...</string>
+    <string name="connection_error">Erro de conexão: %1$s</string>
+    <string name="server_closed_connection">Aviso: Conexão encerrada pelo servidor.</string>
+    <string name="send_failed">Aviso: Não foi possível enviar o comando.</string>
+
+    <string name="notification_channel_name">Conexão MUD</string>
+    <string name="notification_connection_active">Conexão MUD ativa</string>
+
+    <string name="log_session_started">===== Sessão iniciada =====</string>
+    <string name="log_session_ended">===== Sessão encerrada =====</string>
+    <string name="log_default_session_name">Sessao</string>
+</resources>
