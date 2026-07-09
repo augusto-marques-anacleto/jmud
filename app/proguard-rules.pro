@@ -19,3 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keepattributes SourceFile,LineNumberTable
+
+# ExtraFieldUtils do commons-compress instancia ZipExtraField por reflexao
+-keep class org.apache.commons.compress.archivers.zip.** { *; }

@@ -1,5 +1,6 @@
 package br.com.augusto.jmud.ui.components
 
+import android.os.Build
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -43,7 +44,6 @@ fun AppTextField(
 
     val baseInputType = when (keyboardOptions.keyboardType) {
         KeyboardType.Number -> InputType.TYPE_CLASS_NUMBER
-        KeyboardType.Password -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         KeyboardType.Email -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
         else -> InputType.TYPE_CLASS_TEXT
     }
@@ -70,6 +70,9 @@ fun AppTextField(
             editText.hint = label
             editText.inputType = resolvedInputType
             editText.imeOptions = resolvedImeOptions
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                editText.importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO
+            }
             if (singleLine) {
                 editText.isSingleLine = true
             } else {

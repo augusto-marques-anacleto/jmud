@@ -37,7 +37,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -65,6 +67,10 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
     val gameMessages = mutableStateListOf<String>()
     val commandHistory = mutableStateListOf<String>()
     val namedHistories = mutableStateMapOf<String, SnapshotStateList<String>>()
+    val announcements = MutableSharedFlow<String>(
+        extraBufferCapacity = 256,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
 
     var currentScreen = mutableStateOf(AppScreen.MAIN)
     var activeCharacter = mutableStateOf<MudCharacter?>(null)
@@ -237,9 +243,13 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
             logManager.logIncoming(message)
         }
 
-        if (currentGameUseTTS.value && currentScreen.value == AppScreen.GAME) {
-            ttsManager.speak(message, flushNextTTS.value)
-            flushNextTTS.value = false
+        if (currentScreen.value == AppScreen.GAME) {
+            if (currentGameUseTTS.value) {
+                ttsManager.speak(message, flushNextTTS.value)
+                flushNextTTS.value = false
+            } else {
+                announcements.tryEmit(message)
+            }
         }
     }
 
@@ -741,7 +751,11 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         val startMessage = getString(R.string.connecting_to, character.host, character.port)
         gameMessages.add(startMessage)
         if (logsEnabled.value) logManager.logIncoming(startMessage)
-        if (currentGameUseTTS.value) ttsManager.speak(startMessage, true)
+        if (currentGameUseTTS.value) {
+            ttsManager.speak(startMessage, true)
+        } else {
+            announcements.tryEmit(startMessage)
+        }
 
         MudConnectionManager.connect(getApplication(), character.host, character.port)
 
@@ -797,6 +811,7 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         logManager.endSession()
         MudConnectionManager.disconnect(getApplication())
         isConnected.value = false
+        commandHistory.clear()
         lastSentCommand.value = ""
         userJustSentCommand.value = false
         currentScreen.value = AppScreen.MAIN

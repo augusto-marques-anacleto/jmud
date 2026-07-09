@@ -382,10 +382,7 @@ fun AddCharacterDialog(
                     },
                     label = stringResource(R.string.field_password),
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Next
-                    )
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
                 )
                 AppTextField(
                     value = host,

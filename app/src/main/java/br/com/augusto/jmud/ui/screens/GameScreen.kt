@@ -9,6 +9,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -128,15 +129,18 @@ fun GameScreen(viewModel: MudViewModel) {
     LaunchedEffect(Unit) {
         snapshotFlow { viewModel.gameMessages.size }.collect { count ->
             if (count > 0) {
-                if (!viewModel.currentGameUseTTS.value) {
-                    @Suppress("DEPRECATION")
-                    view.announceForAccessibility(viewModel.gameMessages.last())
-                }
                 if (!listState.canScrollForward || viewModel.userJustSentCommand.value) {
                     listState.scrollToItem(count - 1)
                     viewModel.userJustSentCommand.value = false
                 }
             }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.announcements.collect { line ->
+            @Suppress("DEPRECATION")
+            view.announceForAccessibility(line)
         }
     }
 
@@ -241,6 +245,7 @@ fun GameScreen(viewModel: MudViewModel) {
                             .weight(1f)
                             .fillMaxWidth()
                             .padding(horizontal = 8.dp)
+                            .focusable()
                     ) {
                         items(viewModel.gameMessages) { message ->
                             val link = urlRegex.find(message)?.value?.trimEnd('.', ',', ';', ')', ']', '>')
