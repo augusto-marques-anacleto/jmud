@@ -48,6 +48,7 @@ fun SettingsTab(viewModel: MudViewModel) {
     var showVoiceDialog by remember { mutableStateOf(false) }
     var showRetentionDialog by remember { mutableStateOf(false) }
     var showImportConfirmDialog by remember { mutableStateOf(false) }
+    var showDeleteLogsDialog by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
@@ -189,6 +190,11 @@ fun SettingsTab(viewModel: MudViewModel) {
             enabled = viewModel.logsEnabled.value,
             modifier = Modifier.fillMaxWidth()
         )
+        AppButton(
+            text = stringResource(R.string.logs_delete_all),
+            onClick = { showDeleteLogsDialog = true },
+            modifier = Modifier.fillMaxWidth()
+        )
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
@@ -230,6 +236,44 @@ fun SettingsTab(viewModel: MudViewModel) {
             text = stringResource(R.string.check_updates),
             onClick = { viewModel.checkForUpdates() },
             modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    if (showDeleteLogsDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteLogsDialog = false },
+            title = { Text(stringResource(R.string.logs_delete_all)) },
+            text = { Text(stringResource(R.string.logs_delete_confirm)) },
+            confirmButton = {
+                AppButton(
+                    text = stringResource(R.string.logs_delete_confirm_yes),
+                    onClick = {
+                        showDeleteLogsDialog = false
+                        viewModel.deleteAllLogs()
+                    }
+                )
+            },
+            dismissButton = {
+                AppButton(
+                    text = stringResource(R.string.action_cancel),
+                    onClick = { showDeleteLogsDialog = false }
+                )
+            }
+        )
+    }
+
+    val logsMessage = viewModel.logsMessage.value
+    if (logsMessage != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.clearLogsMessage() },
+            title = { Text(stringResource(R.string.settings_logs)) },
+            text = { Text(logsMessage) },
+            confirmButton = {
+                AppButton(
+                    text = stringResource(R.string.action_close),
+                    onClick = { viewModel.clearLogsMessage() }
+                )
+            }
         )
     }
 

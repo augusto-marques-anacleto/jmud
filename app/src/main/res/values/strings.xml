@@ -204,7 +204,9 @@
     <string name="notification_channel_name">Conexão MUD</string>
     <string name="notification_connection_active">Conexão MUD ativa</string>
 
-    <string name="log_session_started">===== Sessão iniciada =====</string>
-    <string name="log_session_ended">===== Sessão encerrada =====</string>
     <string name="log_default_session_name">Sessao</string>
+    <string name="logs_delete_all">Apagar todos os logs</string>
+    <string name="logs_delete_confirm">Apagar todos os logs salvos? Esta ação não pode ser desfeita.</string>
+    <string name="logs_delete_confirm_yes">Sim, apagar</string>
+    <string name="logs_deleted">Logs apagados.</string>
 </resources>

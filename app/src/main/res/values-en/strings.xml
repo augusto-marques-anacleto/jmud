@@ -195,7 +195,9 @@
     <string name="notification_channel_name">MUD Connection</string>
     <string name="notification_connection_active">MUD connection active</string>
 
-    <string name="log_session_started">===== Session started =====</string>
-    <string name="log_session_ended">===== Session ended =====</string>
     <string name="log_default_session_name">Session</string>
+    <string name="logs_delete_all">Delete all logs</string>
+    <string name="logs_delete_confirm">Delete all saved logs? This action cannot be undone.</string>
+    <string name="logs_delete_confirm_yes">Yes, delete</string>
+    <string name="logs_deleted">Logs deleted.</string>
 </resources>

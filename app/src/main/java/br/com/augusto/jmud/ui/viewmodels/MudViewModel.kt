@@ -98,6 +98,7 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
     var triggersEnabled = mutableStateOf(settingsRepository.getTriggersEnabled())
     var timersEnabled = mutableStateOf(settingsRepository.getTimersEnabled())
     var backupMessage = mutableStateOf<String?>(null)
+    var logsMessage = mutableStateOf<String?>(null)
 
     var availableUpdate = mutableStateOf<UpdateInfo?>(null)
     var updateDialogVisible = mutableStateOf(false)
@@ -429,6 +430,22 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         logRetentionDays.value = days
         settingsRepository.saveLogRetentionDays(days)
         logManager.cleanupOldLogs(days)
+    }
+
+    fun deleteAllLogs() {
+        val wasLogging = logsEnabled.value && isConnected.value
+        if (wasLogging) {
+            logManager.endSession()
+        }
+        logManager.deleteAllLogs()
+        if (wasLogging) {
+            activeCharacter.value?.let { logManager.startSession(it.name, it.host) }
+        }
+        logsMessage.value = getString(R.string.logs_deleted)
+    }
+
+    fun clearLogsMessage() {
+        logsMessage.value = null
     }
 
     fun setTriggersEnabledSetting(value: Boolean) {

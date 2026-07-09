@@ -13,7 +13,6 @@ import java.util.concurrent.Executors
 class LogManager(private val context: Context) {
     private val executor = Executors.newSingleThreadExecutor()
     private val sessionFormat = SimpleDateFormat("yyyy-MM-dd HH-mm-ss", Locale.US)
-    private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.US)
 
     private var writer: BufferedWriter? = null
 
@@ -25,7 +24,6 @@ class LogManager(private val context: Context) {
         val hostPart = host.trim()
         val folderName = if (hostPart.isBlank()) baseName else "$baseName ($hostPart)"
         val safeName = folderName.replace(Regex("[\\\\/:*?\"<>|]"), "_")
-        val startedMarker = context.getString(R.string.log_session_started)
         sessionActive = true
         executor.execute {
             closeWriter()
@@ -39,16 +37,13 @@ class LogManager(private val context: Context) {
             } catch (e: Exception) {
                 writer = null
             }
-            write(startedMarker)
         }
     }
 
     fun endSession() {
         if (!sessionActive) return
         sessionActive = false
-        val endedMarker = context.getString(R.string.log_session_ended)
         executor.execute {
-            write(endedMarker)
             closeWriter()
         }
     }
@@ -71,7 +66,7 @@ class LogManager(private val context: Context) {
     private fun write(line: String) {
         val currentWriter = writer ?: return
         try {
-            currentWriter.write("[${timeFormat.format(Date())}] $line")
+            currentWriter.write(line)
             currentWriter.newLine()
             currentWriter.flush()
         } catch (e: Exception) {
@@ -84,6 +79,18 @@ class LogManager(private val context: Context) {
         } catch (e: Exception) {
         } finally {
             writer = null
+        }
+    }
+
+    fun deleteAllLogs() {
+        executor.execute {
+            closeWriter()
+            try {
+                AppStorage.logsDir(context).listFiles()?.forEach { entry ->
+                    entry.deleteRecursively()
+                }
+            } catch (e: Exception) {
+            }
         }
     }
 
