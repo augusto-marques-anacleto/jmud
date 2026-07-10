@@ -47,6 +47,7 @@ import br.com.augusto.jmud.ui.components.AppButton
 import br.com.augusto.jmud.ui.components.AppTextField
 import br.com.augusto.jmud.ui.viewmodels.MudViewModel
 import br.com.augusto.jmud.util.AppStorage
+import br.com.augusto.jmud.util.FolderNames
 import java.io.File
 
 @Composable
@@ -547,18 +548,7 @@ fun CreateFolderPrompt(
     onDismiss: () -> Unit,
     onFolderCreated: (String) -> Unit
 ) {
-    val suggestedName = remember {
-        val parts = host.split(".")
-        val ignoreList = listOf("mud", "play", "www", "jogo", "mush")
-        var suggestion = name.replace(" ", "_").lowercase()
-        for (part in parts) {
-            if (part.isNotBlank() && part.lowercase() !in ignoreList) {
-                suggestion = part.lowercase()
-                break
-            }
-        }
-        suggestion
-    }
+    val suggestedName = remember { FolderNames.suggest(host, name) }
 
     var folderNameInput by remember { mutableStateOf(suggestedName) }
 

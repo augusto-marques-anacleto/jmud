@@ -1,6 +1,6 @@
 {
-  "versionCode": 4,
-  "versionName": "1.3",
-  "url": "https://github.com/augusto-marques-anacleto/jmud/releases/download/v1.3/jMud.apk",
-  "changelog": "Corrigido o fechamento do aplicativo ao descompactar pacotes de sons; histórico de comandos digitados zerado ao trocar de MUD; Shift+Tab do botão Rolar para o final agora passa pelo histórico; TalkBack sem sintetizador lê todas as linhas na fila, sem perder a primeira; removido o aviso de salvar senha ao adicionar ou editar personagens."
+  "versionCode": 5,
+  "versionName": "1.4",
+  "url": "https://github.com/augusto-marques-anacleto/jmud/releases/download/v1.4/jMud.apk",
+  "changelog": "Instalação de pacotes de sons corrigida: arquivos existentes que o sistema não deixa substituir são mantidos e o restante é instalado normalmente; mensagens de falha agora informam o motivo; sugestão de nome da pasta de sons mais inteligente ao criar pasta nova."
 }

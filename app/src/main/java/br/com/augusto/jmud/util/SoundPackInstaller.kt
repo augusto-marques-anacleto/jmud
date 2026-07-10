@@ -5,6 +5,7 @@ import kotlinx.coroutines.ensureActive
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipFile
 import java.io.File
+import java.io.IOException
 import java.net.CookieHandler
 import java.net.CookieManager
 import java.net.HttpURLConnection
@@ -16,6 +17,8 @@ import java.nio.charset.CodingErrorAction
 import java.util.Collections
 
 enum class SoundPackStep { DOWNLOADING, EXTRACTING }
+
+data class ExtractResult(val keptExisting: Int)
 
 data class SoundPackProgress(
     val step: SoundPackStep,
@@ -131,8 +134,12 @@ class SoundPackInstaller {
     ): Boolean {
         val conn = resolveConnection(rawUrl) ?: return false
         try {
-            if (conn.responseCode >= 400) return false
-            if (isHtml(conn)) return false
+            if (conn.responseCode >= 400) {
+                throw IOException("HTTP " + conn.responseCode)
+            }
+            if (isHtml(conn)) {
+                throw IOException("HTML")
+            }
 
             val total = conn.contentLengthLong
             var downloaded = 0L
@@ -200,12 +207,13 @@ class SoundPackInstaller {
         zip: File,
         targetDir: File,
         onProgress: (SoundPackProgress) -> Unit
-    ): Boolean {
+    ): ExtractResult? {
         val encoding = if (Charset.isSupported("CP437")) "CP437" else "ISO-8859-1"
+        var kept = 0
         ZipFile(zip, encoding).use { zipFile ->
             val entries = Collections.list(zipFile.entries).filter { !it.isDirectory }
             val total = entries.size
-            if (total == 0) return false
+            if (total == 0) return null
 
             val names = entries.map { fixEntryName(it).replace('\\', '/') }
             val rootPrefix = commonRootPrefix(names)
@@ -221,14 +229,8 @@ class SoundPackInstaller {
                 if (name.isNotBlank() && name.split('/').none { it == ".." }) {
                     val outFile = File(targetDir, name)
                     outFile.parentFile?.mkdirs()
-                    zipFile.getInputStream(entry).use { input ->
-                        outFile.outputStream().use { output ->
-                            while (true) {
-                                val read = input.read(buffer)
-                                if (read == -1) break
-                                output.write(buffer, 0, read)
-                            }
-                        }
+                    if (!writeEntry(zipFile, entry, outFile, buffer)) {
+                        kept++
                     }
                 }
                 val now = System.currentTimeMillis()
@@ -245,7 +247,34 @@ class SoundPackInstaller {
                 }
             }
         }
-        return true
+        return ExtractResult(kept)
+    }
+
+    private fun writeEntry(
+        zipFile: ZipFile,
+        entry: ZipArchiveEntry,
+        outFile: File,
+        buffer: ByteArray
+    ): Boolean {
+        repeat(2) { attempt ->
+            try {
+                zipFile.getInputStream(entry).use { input ->
+                    outFile.outputStream().use { output ->
+                        while (true) {
+                            val read = input.read(buffer)
+                            if (read == -1) break
+                            output.write(buffer, 0, read)
+                        }
+                    }
+                }
+                return true
+            } catch (e: IOException) {
+                if (!outFile.exists()) throw e
+                if (attempt == 0 && outFile.delete()) return@repeat
+                return false
+            }
+        }
+        return false
     }
 
     private fun commonRootPrefix(names: List<String>): String {

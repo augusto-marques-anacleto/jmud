@@ -60,9 +60,9 @@ class SoundPackInstallerTest {
         }
 
         val target = tempFolder.newFolder("destino")
-        val ok = installer.extractAndCopy(zip, target) {}
+        val result = installer.extractAndCopy(zip, target) {}
 
-        assertTrue(ok)
+        assertTrue(result != null && result.keptExisting == 0)
         assertTrue(File(target, "Abençoar_01.wav").exists())
         assertTrue(File(target, "Abrindo_Túmulo_01.wav").exists())
     }
@@ -77,9 +77,42 @@ class SoundPackInstallerTest {
         }
 
         val target = tempFolder.newFolder("destinoutf8")
-        val ok = installer.extractAndCopy(zip, target) {}
+        val result = installer.extractAndCopy(zip, target) {}
 
-        assertTrue(ok)
+        assertTrue(result != null && result.keptExisting == 0)
         assertTrue(File(target, "Canção_01.wav").exists())
+    }
+
+    @Test
+    fun recoversWhenExistingFileIsNotWritable() = runBlocking {
+        val zip = tempFolder.newFile("packkeep.zip")
+        ZipArchiveOutputStream(zip).use { out ->
+            out.putArchiveEntry(ZipArchiveEntry("sons/bloqueado.wav"))
+            out.write(byteArrayOf(9, 9, 9))
+            out.closeArchiveEntry()
+            out.putArchiveEntry(ZipArchiveEntry("sons/livre.wav"))
+            out.write(byteArrayOf(7))
+            out.closeArchiveEntry()
+        }
+
+        val target = tempFolder.newFolder("destinokeep")
+        val blocked = File(target, "bloqueado.wav")
+        blocked.writeBytes(byteArrayOf(1, 2))
+        blocked.setWritable(false)
+        try {
+            val result = installer.extractAndCopy(zip, target) {}
+
+            assertTrue(result != null)
+            val kept = result!!.keptExisting
+            if (kept == 0) {
+                assertEquals(3, blocked.length().toInt())
+            } else {
+                assertEquals(1, kept)
+                assertEquals(2, blocked.length().toInt())
+            }
+            assertTrue(File(target, "livre.wav").exists())
+        } finally {
+            blocked.setWritable(true)
+        }
     }
 }

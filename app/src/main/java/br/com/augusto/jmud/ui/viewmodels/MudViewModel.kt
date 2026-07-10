@@ -21,6 +21,7 @@ import br.com.augusto.jmud.domain.MudTrigger
 import br.com.augusto.jmud.domain.Scope
 import br.com.augusto.jmud.util.AppStorage
 import br.com.augusto.jmud.util.BackupManager
+import br.com.augusto.jmud.util.ExtractResult
 import br.com.augusto.jmud.util.LogManager
 import br.com.augusto.jmud.util.MspParser
 import br.com.augusto.jmud.util.MudAudioManager
@@ -607,8 +608,11 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         runSoundPackJob(folder) { tempZip, targetDir ->
-            soundPackInstaller.download(rawUrl, tempZip) { publishSoundPackProgress(it) } &&
+            if (soundPackInstaller.download(rawUrl, tempZip) { publishSoundPackProgress(it) }) {
                 soundPackInstaller.extractAndCopy(tempZip, targetDir) { publishSoundPackProgress(it) }
+            } else {
+                null
+            }
         }
     }
 
@@ -619,7 +623,11 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
                 tempZip.outputStream().use { output -> input.copyTo(output) }
                 true
             } ?: false
-            copied && soundPackInstaller.extractAndCopy(tempZip, targetDir) { publishSoundPackProgress(it) }
+            if (copied) {
+                soundPackInstaller.extractAndCopy(tempZip, targetDir) { publishSoundPackProgress(it) }
+            } else {
+                null
+            }
         }
     }
 
@@ -632,7 +640,7 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun runSoundPackJob(
         folder: String,
-        work: suspend (tempZip: File, targetDir: File) -> Boolean
+        work: suspend (tempZip: File, targetDir: File) -> ExtractResult?
     ) {
         val app = getApplication<Application>()
         soundPackDialogVisible.value = true
@@ -642,15 +650,27 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
             val tempRoot = app.externalCacheDir ?: app.cacheDir
             val tempZip = File(tempRoot, "soundpack.zip")
             try {
-                val ok = withContext(Dispatchers.IO) {
+                val result = withContext(Dispatchers.IO) {
                     work(tempZip, File(AppStorage.baseDir(app), folder))
                 }
-                if (ok) {
+                if (result != null) {
                     resultMessage = getString(R.string.sound_pack_installed, folder)
+                    if (result.keptExisting > 0) {
+                        resultMessage += " " + app.resources.getQuantityString(
+                            R.plurals.sound_pack_kept_files,
+                            result.keptExisting,
+                            result.keptExisting
+                        )
+                    }
                 }
             } catch (e: CancellationException) {
                 resultMessage = getString(R.string.sound_pack_cancelled)
             } catch (e: Exception) {
+                android.util.Log.e("jMud", "Falha na instalação do pacote de sons", e)
+                resultMessage = getString(
+                    R.string.sound_pack_failed_reason,
+                    e.message ?: e.javaClass.simpleName
+                )
             } finally {
                 withContext(NonCancellable) {
                     tempZip.delete()
