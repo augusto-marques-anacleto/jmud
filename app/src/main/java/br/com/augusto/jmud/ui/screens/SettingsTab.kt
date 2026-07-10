@@ -51,7 +51,7 @@ fun SettingsTab(viewModel: MudViewModel) {
     var showDeleteLogsDialog by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.CreateDocument("application/json")
+        ActivityResultContracts.CreateDocument("application/octet-stream")
     ) { uri ->
         if (uri != null) {
             viewModel.exportBackup(uri)
@@ -211,7 +211,7 @@ fun SettingsTab(viewModel: MudViewModel) {
             text = stringResource(R.string.backup_export),
             onClick = {
                 val date = SimpleDateFormat("yyyy-MM-dd_HH-mm", Locale.US).format(Date())
-                exportLauncher.launch("jmud_backup_$date.json")
+                exportLauncher.launch("jmud_backup_$date.jmud")
             },
             modifier = Modifier.fillMaxWidth()
         )
