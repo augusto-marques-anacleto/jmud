@@ -49,6 +49,7 @@ fun SettingsTab(viewModel: MudViewModel) {
     var showRetentionDialog by remember { mutableStateOf(false) }
     var showImportConfirmDialog by remember { mutableStateOf(false) }
     var showDeleteLogsDialog by remember { mutableStateOf(false) }
+    var showUtf8Warning by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/octet-stream")
@@ -89,7 +90,11 @@ fun SettingsTab(viewModel: MudViewModel) {
         RadioRow(
             label = stringResource(R.string.encoding_utf8),
             selected = viewModel.encoding.value == ENCODING_UTF8,
-            onSelect = { viewModel.setEncodingSetting(ENCODING_UTF8) }
+            onSelect = {
+                if (viewModel.encoding.value != ENCODING_UTF8) {
+                    showUtf8Warning = true
+                }
+            }
         )
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -236,6 +241,29 @@ fun SettingsTab(viewModel: MudViewModel) {
             text = stringResource(R.string.check_updates),
             onClick = { viewModel.checkForUpdates() },
             modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    if (showUtf8Warning) {
+        AlertDialog(
+            onDismissRequest = { showUtf8Warning = false },
+            title = { Text(stringResource(R.string.attention_title)) },
+            text = { Text(stringResource(R.string.encoding_utf8_warning)) },
+            confirmButton = {
+                AppButton(
+                    text = stringResource(R.string.encoding_utf8_confirm),
+                    onClick = {
+                        showUtf8Warning = false
+                        viewModel.setEncodingSetting(ENCODING_UTF8)
+                    }
+                )
+            },
+            dismissButton = {
+                AppButton(
+                    text = stringResource(R.string.action_cancel),
+                    onClick = { showUtf8Warning = false }
+                )
+            }
         )
     }
 

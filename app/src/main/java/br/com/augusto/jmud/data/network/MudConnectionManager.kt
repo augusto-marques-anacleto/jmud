@@ -2,6 +2,7 @@ package br.com.augusto.jmud.data.network
 
 import android.content.Context
 import android.content.Intent
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -127,7 +128,7 @@ object MudConnectionManager {
                 telnetState = TelnetState.DATA
                 telnetVerb = 0
                 val intent = Intent(context, MudService::class.java)
-                context.startService(intent)
+                ContextCompat.startForegroundService(context, intent)
 
                 val activeSocket = Socket(host, port)
                 activeSocket.keepAlive = true

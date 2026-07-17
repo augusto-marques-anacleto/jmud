@@ -60,11 +60,14 @@
     <string name="reconnect_question">Você não está conectado. Deseja reconectar?</string>
     <string name="back_to_home">Voltar para a tela inicial</string>
     <string name="stay_in_history">Permanecer no histórico</string>
+    <string name="history_label">Histórico de mensagens. Use as setas para ler linha por linha.</string>
 
     <string name="settings_connection">Conexão</string>
     <string name="settings_encoding">Codificação de caracteres</string>
     <string name="encoding_iso">ISO-8859-1 (padrão dos MUDs)</string>
     <string name="encoding_utf8" translatable="false">UTF-8</string>
+    <string name="encoding_utf8_warning">A maioria dos MUDs usa a codificação ISO-8859-1. Se este jogo não tiver suporte a UTF-8, os acentos podem sair errados, principalmente nos comandos enviados. Deseja usar UTF-8 mesmo assim?</string>
+    <string name="encoding_utf8_confirm">Sim, usar UTF-8</string>
     <string name="settings_tts">Sintetizador de voz</string>
     <string name="tts_engine_value">Mecanismo de fala: %1$s</string>
     <string name="tts_engine_title">Mecanismo de fala</string>

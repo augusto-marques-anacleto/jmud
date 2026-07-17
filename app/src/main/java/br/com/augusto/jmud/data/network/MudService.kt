@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -33,8 +34,22 @@ class MudService : Service() {
             .setContentText(getString(R.string.notification_connection_active))
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .build()
-        startForeground(1, notification)
+        ServiceCompat.startForeground(
+            this,
+            1,
+            notification,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+            } else {
+                0
+            }
+        )
         return START_NOT_STICKY
+    }
+
+    override fun onTimeout(startId: Int) {
+        MudConnectionManager.closeConnection()
+        stopSelf()
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {

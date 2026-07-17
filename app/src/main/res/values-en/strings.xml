@@ -58,12 +58,15 @@
     <string name="back_to_home">Back to home screen</string>
     <string name="stay_in_history">Stay in history</string>
 
+    <string name="history_label">Message history. Use the arrow keys to read line by line.</string>
     <string name="switch_on">on</string>
     <string name="switch_off">off</string>
 
     <string name="settings_connection">Connection</string>
     <string name="settings_encoding">Character encoding</string>
     <string name="encoding_iso">ISO-8859-1 (MUD standard)</string>
+    <string name="encoding_utf8_warning">Most MUDs use the ISO-8859-1 encoding. If this game does not support UTF-8, accented characters may come out wrong, especially in the commands you send. Use UTF-8 anyway?</string>
+    <string name="encoding_utf8_confirm">Yes, use UTF-8</string>
     <string name="settings_tts">Speech synthesizer</string>
     <string name="tts_engine_value">Speech engine: %1$s</string>
     <string name="tts_engine_title">Speech engine</string>

@@ -45,6 +45,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -92,6 +94,7 @@ fun GameScreen(viewModel: MudViewModel) {
 
     var historyIndex by remember { mutableIntStateOf(-1) }
     var commandDraft by remember { mutableStateOf("") }
+    var reviewIndex by remember { mutableIntStateOf(-1) }
 
     var commandEditText by remember { mutableStateOf<EditText?>(null) }
     val listState = rememberLazyListState()
@@ -101,6 +104,20 @@ fun GameScreen(viewModel: MudViewModel) {
     val characterName = viewModel.activeCharacter.value?.name
         ?: stringResource(R.string.unknown_character)
 
+    val reviewLine: (Int) -> Unit = { step ->
+        val messages = viewModel.gameMessages
+        if (messages.isNotEmpty()) {
+            reviewIndex = if (reviewIndex == -1) {
+                messages.size - 1
+            } else {
+                (reviewIndex + step).coerceIn(0, messages.size - 1)
+            }
+            coroutineScope.launch { listState.scrollToItem(reviewIndex) }
+            @Suppress("DEPRECATION")
+            view.announceForAccessibility(messages[reviewIndex])
+        }
+    }
+
     val onSendCommand: () -> Unit = {
         val finalCommand = if (command.isNotBlank()) command else viewModel.lastSentCommand.value
         if (finalCommand.isNotBlank()) {
@@ -109,6 +126,8 @@ fun GameScreen(viewModel: MudViewModel) {
                 command = ""
                 historyIndex = -1
                 commandDraft = ""
+                reviewIndex = -1
+                commandEditText?.setText("")
                 commandEditText?.requestFocus()
             } else {
                 showDisconnectedSend = true
@@ -127,7 +146,12 @@ fun GameScreen(viewModel: MudViewModel) {
     }
 
     LaunchedEffect(Unit) {
+        var previousCount = 0
         snapshotFlow { viewModel.gameMessages.size }.collect { count ->
+            if (count < previousCount) {
+                reviewIndex = -1
+            }
+            previousCount = count
             if (count > 0) {
                 if (!listState.canScrollForward || viewModel.userJustSentCommand.value) {
                     listState.scrollToItem(count - 1)
@@ -239,12 +263,68 @@ fun GameScreen(viewModel: MudViewModel) {
                         )
                     }
 
+                    val historyLabel = stringResource(R.string.history_label)
                     LazyColumn(
                         state = listState,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth()
                             .padding(horizontal = 8.dp)
+                            .onFocusChanged { focusState ->
+                                if (focusState.isFocused) {
+                                    @Suppress("DEPRECATION")
+                                    view.announceForAccessibility(historyLabel)
+                                }
+                            }
+                            .onKeyEvent { keyEvent ->
+                                val native = keyEvent.nativeKeyEvent
+                                val reviewKeys = intArrayOf(
+                                    KeyEvent.KEYCODE_DPAD_UP,
+                                    KeyEvent.KEYCODE_DPAD_DOWN,
+                                    KeyEvent.KEYCODE_PAGE_UP,
+                                    KeyEvent.KEYCODE_PAGE_DOWN,
+                                    KeyEvent.KEYCODE_MOVE_HOME,
+                                    KeyEvent.KEYCODE_MOVE_END,
+                                    KeyEvent.KEYCODE_ESCAPE
+                                )
+                                if (native.action != KeyEvent.ACTION_DOWN) {
+                                    native.keyCode in reviewKeys
+                                } else {
+                                    when (native.keyCode) {
+                                        KeyEvent.KEYCODE_DPAD_UP -> {
+                                            reviewLine(-1)
+                                            true
+                                        }
+                                        KeyEvent.KEYCODE_DPAD_DOWN -> {
+                                            reviewLine(1)
+                                            true
+                                        }
+                                        KeyEvent.KEYCODE_PAGE_UP -> {
+                                            reviewLine(-10)
+                                            true
+                                        }
+                                        KeyEvent.KEYCODE_PAGE_DOWN -> {
+                                            reviewLine(10)
+                                            true
+                                        }
+                                        KeyEvent.KEYCODE_MOVE_HOME -> {
+                                            reviewIndex = 1
+                                            reviewLine(-1)
+                                            true
+                                        }
+                                        KeyEvent.KEYCODE_MOVE_END -> {
+                                            reviewIndex = -1
+                                            reviewLine(1)
+                                            true
+                                        }
+                                        KeyEvent.KEYCODE_ESCAPE -> {
+                                            commandEditText?.requestFocus()
+                                            true
+                                        }
+                                        else -> false
+                                    }
+                                }
+                            }
                             .focusable()
                     ) {
                         items(viewModel.gameMessages) { message ->
@@ -311,9 +391,17 @@ fun GameScreen(viewModel: MudViewModel) {
                             onEditTextCreated = { commandEditText = it },
                             onKeyEvent = { keyEvent ->
                                 when (keyEvent.keyCode) {
-                                    KeyEvent.KEYCODE_ENTER -> {
+                                    KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER -> {
                                         if (keyEvent.action == KeyEvent.ACTION_UP) {
                                             onSendCommand()
+                                        }
+                                        true
+                                    }
+                                    KeyEvent.KEYCODE_PAGE_UP, KeyEvent.KEYCODE_PAGE_DOWN -> {
+                                        if (keyEvent.action == KeyEvent.ACTION_DOWN) {
+                                            reviewLine(
+                                                if (keyEvent.keyCode == KeyEvent.KEYCODE_PAGE_UP) -1 else 1
+                                            )
                                         }
                                         true
                                     }

@@ -13,12 +13,17 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.viewinterop.AndroidView
+
+private class DispatchedValue {
+    var text: String? = null
+}
 
 @Composable
 fun AppTextField(
@@ -34,7 +39,7 @@ fun AppTextField(
     onKeyEvent: ((KeyEvent) -> Boolean)? = null,
     onEditTextCreated: ((EditText) -> Unit)? = null
 ) {
-    val currentValue by rememberUpdatedState(value)
+    val dispatched = remember { DispatchedValue() }
     val currentOnValueChange by rememberUpdatedState(onValueChange)
     val currentOnImeAction by rememberUpdatedState(onImeAction)
     val currentOnKeyEvent by rememberUpdatedState(onKeyEvent)
@@ -89,9 +94,8 @@ fun AppTextField(
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: Editable?) {
                     val newText = s?.toString() ?: ""
-                    if (newText != currentValue) {
-                        currentOnValueChange(newText)
-                    }
+                    dispatched.text = newText
+                    currentOnValueChange(newText)
                 }
             })
 
@@ -122,7 +126,7 @@ fun AppTextField(
             if (editText.currentHintTextColor != hintColor) {
                 editText.setHintTextColor(hintColor)
             }
-            if (editText.text.toString() != value) {
+            if (editText.text.toString() != value && value != dispatched.text) {
                 editText.setText(value)
                 editText.setSelection(value.length)
             }
