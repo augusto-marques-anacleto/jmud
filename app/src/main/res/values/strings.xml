@@ -68,6 +68,9 @@
     <string name="encoding_utf8" translatable="false">UTF-8</string>
     <string name="encoding_utf8_warning">A maioria dos MUDs usa a codificação ISO-8859-1. Se este jogo não tiver suporte a UTF-8, os acentos podem sair errados, principalmente nos comandos enviados. Deseja usar UTF-8 mesmo assim?</string>
     <string name="encoding_utf8_confirm">Sim, usar UTF-8</string>
+    <string name="settings_commands">Comandos</string>
+    <string name="command_separator_label">Separador de comandos</string>
+    <string name="command_separator_description">Envie vários comandos de uma vez separando-os por este texto. O padrão é espaço, arroba, espaço. Deixe o campo vazio para desativar.</string>
     <string name="settings_tts">Sintetizador de voz</string>
     <string name="tts_engine_value">Mecanismo de fala: %1$s</string>
     <string name="tts_engine_title">Mecanismo de fala</string>
@@ -173,6 +176,26 @@
     <string name="trigger_description" translatable="false">%1$s — %2$s: %3$s, %4$s</string>
     <string name="trigger_disabled_suffix">" (desativada)"</string>
 
+    <string name="trigger_help_button">Ajuda</string>
+    <string name="trigger_help_title">Como criar triggers</string>
+    <string name="trigger_help_intro">Uma trigger vigia cada linha que chega do jogo. Quando a linha combina com a mensagem configurada, a trigger age sozinha: pode enviar comandos, tocar um som do pacote, guardar a linha em um histórico com nome ou ocultar a linha. Maiúsculas e minúsculas não fazem diferença.</string>
+    <string name="trigger_help_types_title">Tipos de busca</string>
+    <string name="trigger_help_type_start">Busca no início: dispara quando a linha começa com a mensagem. Exemplo: a mensagem \"Você está com fome\" dispara na linha \"Você está com fome e fraco.\"</string>
+    <string name="trigger_help_type_contains">Busca no meio: dispara quando a mensagem aparece em qualquer parte da linha. Exemplo: a mensagem \"chega vindo\" dispara em \"Um mercador chega vindo do norte.\"</string>
+    <string name="trigger_help_type_end">Busca no fim: dispara quando a linha termina com a mensagem. Exemplo: a mensagem \"grita com você!\" dispara em \"O guarda grita com você!\"</string>
+    <string name="trigger_help_type_exact">Texto completo: dispara somente quando a linha inteira é exatamente igual à mensagem.</string>
+    <string name="trigger_help_type_pattern">Padrão com coringas: a mensagem descreve a linha inteira usando símbolos que casam com as partes que variam. É o tipo mais poderoso; veja os coringas a seguir.</string>
+    <string name="trigger_help_pattern_title">Coringas do padrão</string>
+    <string name="trigger_help_pattern_body">No tipo padrão com coringas, o asterisco (*) casa com qualquer trecho, a arroba (@) casa com uma palavra, o e comercial (&amp;) casa com um número e a interrogação (?) casa com um único caractere. Cada coringa captura o que casou e vira $1, $2, $3 e assim por diante, na ordem em que aparece, para usar nos comandos. O padrão precisa descrever a linha inteira, do começo ao fim. Para procurar um desses símbolos literalmente, escreva uma barra invertida antes dele, como \\*.</string>
+    <string name="trigger_help_variables_title">Variáveis nos comandos</string>
+    <string name="trigger_help_variables_body">Nos comandos, $0 é a linha inteira e $1 a $9 são os trechos capturados pelos coringas do padrão. Também existem $s, $t, $u e assim até $y: contando as palavras a partir do ponto da linha em que a busca casou, $s é a segunda palavra, $t é a terceira, e assim por diante. $z insere uma quebra de linha, separando dois comandos. Cada linha do campo de comandos é enviada como um comando separado.</string>
+    <string name="trigger_help_examples_title">Exemplos completos</string>
+    <string name="trigger_help_example_start">Comer quando tiver fome. Mensagem: \"Você está com fome\", tipo busca no início. Comandos, um por linha: \"pegar pao mochila\" e \"comer pao\".</string>
+    <string name="trigger_help_example_pattern">Olhar quem chega. Mensagem: \"* chega vindo do *.\", tipo padrão com coringas. Na linha \"Um mercador chega vindo do norte.\", $1 vira \"Um mercador\" e $2 vira \"norte\". Comando: \"olhar $1\".</string>
+    <string name="trigger_help_example_number">Guardar moedas recebidas. Mensagem: \"Você recebe &amp; moeda*\", tipo padrão com coringas. Na linha \"Você recebe 50 moedas de ouro.\", $1 vira \"50\". Comando: \"depositar $1 moedas\".</string>
+    <string name="trigger_help_example_sound">Alerta sonoro de perigo. Mensagem: \"grita com você!\", tipo busca no fim, campo nome de som preenchido com um som do pacote, por exemplo \"alerta\". O som toca sempre que alguém gritar com você.</string>
+    <string name="trigger_help_example_ignore">Silenciar mensagens repetitivas. Mensagem: \"A chuva continua caindo\", tipo busca no início, com a opção ignorar no histórico ativada. A linha não aparece no histórico nem é falada.</string>
+
     <string name="open_link_title">Abrir link</string>
     <string name="open_link_question">Deseja abrir este link no navegador?</string>
     <string name="action_open">Abrir</string>
@@ -217,4 +240,66 @@
     <string name="logs_delete_confirm">Apagar todos os logs salvos? Esta ação não pode ser desfeita.</string>
     <string name="logs_delete_confirm_yes">Sim, apagar</string>
     <string name="logs_deleted">Logs apagados.</string>
+
+    <string name="settings_manage_sounds">Gerenciar sons</string>
+    <string name="manage_sounds_description">As pastas de sons ficam no armazenamento interno do aparelho, dentro da pasta Documents, na pasta jMud. Aqui você pode criar e excluir pastas e atribuir uma pasta a um personagem.</string>
+    <string name="sound_folders_button">Pastas de sons</string>
+    <string name="create_sound_folder">Criar pasta de sons</string>
+    <string name="no_sound_folders">Nenhuma pasta de sons encontrada. Crie uma pasta aqui ou instale um pacote de sons pelo botão Mais opções na tela do jogo.</string>
+    <plurals name="folder_files_count">
+        <item quantity="one">%d arquivo de som</item>
+        <item quantity="other">%d arquivos de som</item>
+    </plurals>
+    <string name="folder_used_by">Usada pelos personagens: %1$s.</string>
+    <string name="folder_used_by_none">Nenhum personagem usa esta pasta.</string>
+    <string name="assign_to_character">Atribuir a um personagem</string>
+    <string name="delete_folder">Excluir pasta</string>
+    <string name="delete_folder_confirm">Excluir a pasta %1$s e todos os arquivos dentro dela? Esta ação não pode ser desfeita.</string>
+    <string name="delete_folder_used_warning">Atenção: os personagens %1$s usam esta pasta e ficarão sem pasta de sons.</string>
+    <string name="delete_folder_confirm_yes">Sim, excluir</string>
+    <string name="assign_folder_title">Atribuir a pasta %1$s</string>
+    <string name="no_characters_to_assign">Nenhum personagem salvo. Crie um personagem na aba Personagens primeiro.</string>
+    <string name="assign_character_current">%1$s. Pasta atual: %2$s</string>
+    <string name="folder_assigned">Pasta %1$s atribuída ao personagem %2$s.</string>
+    <string name="action_create">Criar</string>
+    <string name="send_suggestion">Enviar sugestão por e-mail</string>
+    <string name="suggestion_email" translatable="false">augustoanacletoprojetos@gmail.com</string>
+
+    <string name="settings_about">Sobre este aplicativo</string>
+    <string name="open_github">Abrir página do projeto no GitHub</string>
+    <string name="github_url" translatable="false">https://github.com/augusto-marques-anacleto/jmud</string>
+    <string name="help_button">Ajuda</string>
+    <string name="open_app_help">Ajuda do aplicativo</string>
+    <string name="help_game_button">Ajuda da tela do jogo</string>
+    <string name="help_page_title">%1$s. Página %2$d de %3$d</string>
+    <string name="help_previous">Anterior</string>
+    <string name="help_next">Próximo</string>
+
+    <string name="welcome_title">Boas-vindas ao jMud!</string>
+    <string name="welcome_message">Que bom ter você aqui! O jMud tem uma ajuda completa que apresenta cada recurso do aplicativo, página por página: personagens, tela do jogo, triggers, temporizadores, sons e muito mais. Deseja conhecer os recursos agora? Você também pode abrir esta apresentação quando quiser em Configurações, na seção Sobre este aplicativo.</string>
+    <string name="welcome_show">Conhecer os recursos</string>
+    <string name="welcome_later">Agora não</string>
+
+    <string name="help_overview_title">Visão geral</string>
+    <string name="help_overview_body">O jMud é um cliente de MUD criado para ser totalmente acessível com leitores de tela. MUDs são jogos de texto multijogador acessados pela internet: o servidor envia descrições e acontecimentos em texto, e você joga digitando comandos.\n\nA tela inicial tem quatro abas na parte de baixo: Personagens, para salvar seus jogos e conectar; Triggers, para reagir automaticamente a mensagens do jogo; Temporizadores, para repetir comandos de tempos em tempos; e Configurações, para ajustar voz, sons, logs e backup.\n\nDurante o jogo, as mesmas abas aparecem na parte de cima da tela, então dá para criar triggers, temporizadores e mudar configurações sem desconectar.\n\nUse os botões Anterior e Próximo para navegar por esta ajuda. Você pode reabri-la quando quiser em Configurações, na seção Sobre este aplicativo.</string>
+    <string name="help_characters_title">Personagens e conexão</string>
+    <string name="help_characters_body">Na aba Personagens você salva os jogos que costuma acessar. Toque em Adicionar e informe o nome do personagem, o endereço do servidor, a porta e, se quiser, a senha.\n\nCom a opção de login automático ativada, o jMud envia o nome e a senha assim que a conexão é estabelecida, e você entra no jogo sem digitar nada. No campo de comandos após conectar, você pode listar comandos, um por linha, que serão enviados logo depois do login.\n\nCada personagem também guarda suas preferências de sintetizador de voz e de sons, além da pasta de sons usada por aquele jogo. No botão Escolher Pasta, você seleciona uma pasta existente ou cria uma nova, e o aplicativo sugere um nome com base no endereço do servidor. Onde as pastas ficam e como gerenciá-las é explicado em detalhes na página Sons e pacotes de sons desta ajuda.\n\nPara conectar, basta tocar no personagem na lista. Um toque longo abre as opções de editar e remover; essas ações também aparecem no menu de ações do leitor de tela.\n\nO botão Conexão Manual permite conectar a qualquer servidor informando apenas endereço e porta, sem salvar personagem.</string>
+    <string name="help_game_title">Tela do jogo</string>
+    <string name="help_game_body">A tela do jogo mostra o histórico de mensagens, o campo de comando e o botão Enviar.\n\nNo topo há dois interruptores: Sintetizador, que controla se as mensagens recebidas são faladas, e Sons, que controla os efeitos sonoros. O botão Mais opções reúne outras ações: ativar ou desativar triggers e temporizadores, baixar ou importar pacotes de sons e desconectar.\n\nNo histórico, você pode ler as mensagens linha por linha com o leitor de telas. O botão Rolar para o final leva às mensagens mais recentes, e Limpar histórico apaga a tela.\n\nEscreva no campo de comando e toque em Enviar. Com o campo vazio, Enviar repete o último comando, prático para andar ou repetir ações.\n\nSe você usa teclado físico, a página Jogando com o teclado desta ajuda explica os atalhos disponíveis.\n\nUm toque longo no botão Enviar abre os históricos nomeados, listas separadas que os triggers podem alimentar, como um canal de conversa ou registros de combate. Quando uma mensagem contém um link, dá para abri-lo tocando na linha.</string>
+    <string name="help_keyboard_title">Jogando com o teclado</string>
+    <string name="help_keyboard_body">Se você conecta um teclado físico ao aparelho, o jMud oferece atalhos para jogar com agilidade.\n\nCom o foco no campo de comando: a tecla Enter envia o que está escrito e, com o campo vazio, envia novamente o último comando, o que facilita repetir ações e andar pelo jogo. As teclas Page Up e Page Down leem o histórico linha por linha sem tirar o foco do campo: a revisão começa pela mensagem mais recente, Page Up volta para as linhas anteriores e Page Down avança para as mais novas. Cada linha é anunciada pelo leitor de telas. Ao enviar um comando, a revisão volta para o fim do histórico.\n\nCom o foco na lista do histórico: as setas para cima e para baixo leem linha por linha, Page Up e Page Down pulam dez linhas de uma vez, Home vai para a primeira mensagem, End vai para a última e Escape devolve o foco ao campo de comando.\n\nObservação: o uso do teclado no aplicativo pode variar dependendo do teclado e do leitor de telas utilizados, que podem apresentar comportamentos diferentes entre si.</string>
+    <string name="help_multi_commands_title">Vários comandos de uma vez</string>
+    <string name="help_multi_commands_body">Você pode enviar vários comandos de uma vez separando-os por espaço, arroba, espaço. Por exemplo: falar bom dia! @ falar tudo bem? envia os dois comandos em sequência, na ordem em que foram escritos.\n\nO arroba foi escolhido por ser fácil de alcançar no teclado do celular, mas o separador é seu: em Configurações, na seção Comandos, você pode trocá-lo por ponto e vírgula ou qualquer outro texto, ou deixar o campo vazio para desativar o recurso.\n\nComo o separador padrão inclui os espaços em volta, um arroba colado em outra palavra, como em um endereço de e-mail, não divide nada.</string>
+    <string name="help_triggers_title">Triggers</string>
+    <string name="help_triggers_body">Triggers são reações automáticas a mensagens do jogo. Quando uma linha recebida corresponde ao texto configurado, o jMud pode enviar comandos em resposta, tocar um som da sua pasta de sons, guardar a linha em um histórico nomeado ou ignorar a linha, deixando de falar e de mostrar mensagens repetitivas.\n\nCada trigger tem um escopo: pode valer para todos os jogos, para um servidor específico ou para um único personagem. Também é possível desativar um trigger sem apagá-lo, ou desativar todos de uma vez pelo botão Mais opções na tela do jogo.\n\nOs tipos de correspondência incluem começa com, contém, termina com, mensagem exata e padrão com variáveis, que permite capturar partes da mensagem e usá-las nos comandos de resposta.\n\nA aba Triggers tem um botão Ajuda próprio com a explicação detalhada de cada tipo, dos padrões e das variáveis, com vários exemplos prontos.</string>
+    <string name="help_timers_title">Temporizadores</string>
+    <string name="help_timers_body">Temporizadores enviam comandos automaticamente de tempos em tempos enquanto você está conectado. Ao criar um, você define o intervalo em segundos e os comandos, um por linha.\n\nSão úteis para manter a conexão ativa em jogos que desconectam por inatividade, para repetir ações de treino ou para qualquer rotina que precise acontecer com regularidade.\n\nAssim como os triggers, cada temporizador tem escopo: todos os jogos, um servidor ou um personagem específico. Você pode desativar um temporizador individualmente ao editá-lo, ou desativar todos pelo botão Mais opções na tela do jogo.\n\nOs temporizadores só funcionam com a conexão aberta; ao desconectar, todos param automaticamente.</string>
+    <string name="help_sounds_title">Sons e pacotes de sons</string>
+    <string name="help_sounds_body">O jMud tem suporte ao protocolo MSP, usado pelos MUDs para tocar efeitos sonoros e músicas. Quando o jogo tem esse suporte e o interruptor Sons está ativado, os sons tocam automaticamente durante a partida.\n\nOnde as pastas ficam: no armazenamento interno do aparelho existe uma pasta chamada Documents, e dentro dela fica a pasta jMud. Cada subpasta da pasta jMud é uma pasta de sons. No gerenciador de arquivos, o caminho é Armazenamento interno, depois Documents, depois jMud. Atenção: é a pasta Documents do armazenamento interno, e não o atalho Documentos que aparece na tela inicial de alguns gerenciadores.\n\nComo o cliente usa as pastas: cada personagem tem uma pasta de sons atribuída, escolhida ao criar ou editar o personagem, o que mantém os sons de cada jogo separados. Quando o jogo ou um trigger pede um som pelo nome, o jMud procura o arquivo dentro da pasta daquele personagem, completando sozinho as extensões wav, mp3 e ogg. Sons que o servidor manda por endereço da internet são baixados uma vez e guardados em cache.\n\nPara instalar sons, use o botão Mais opções na tela do jogo: Baixar pacote de sons baixa e instala um pacote a partir de um link, e Importar pacote ZIP instala um arquivo que já esteja no seu aparelho. Muitos MUDs com suporte a som distribuem esses pacotes em seus sites.\n\nPara organizar tudo, a seção Gerenciar sons das Configurações lista suas pastas com a quantidade de arquivos de cada uma, mostra quais personagens usam cada pasta e permite criar uma pasta, excluir uma pasta e atribuir uma pasta a um personagem sem precisar editá-lo.\n\nOs triggers também podem tocar um som pelo nome do arquivo, o que permite criar seus próprios alertas sonoros mesmo em jogos sem MSP.</string>
+    <string name="help_logs_title">Logs de sessão</string>
+    <string name="help_logs_body">O jMud pode gravar tudo o que acontece em cada sessão de jogo: as mensagens recebidas e os comandos enviados. Os logs são organizados por sessão, com data e hora, personagem e servidor.\n\nNa seção Logs das Configurações você ativa ou desativa a gravação, escolhe por quantos dias os arquivos ficam guardados, de sete dias a nunca apagar, e pode apagar todos de uma vez.\n\nOs logs são úteis para reler uma cena, conferir um combate ou guardar conversas importantes.</string>
+    <string name="help_backup_title">Backup</string>
+    <string name="help_backup_body">Na seção Backup das Configurações você pode exportar todos os seus dados para um único arquivo com a extensão jmud: personagens, triggers, temporizadores e preferências.\n\nGuarde esse arquivo em um lugar seguro, como seu serviço de nuvem preferido. Ao trocar de aparelho ou reinstalar o aplicativo, use Importar backup para recuperar tudo de uma vez.\n\nAtenção: a importação substitui os dados atuais pelos do arquivo. Os arquivos de som não entram no backup; se precisar, reinstale os pacotes de sons pelo botão Mais opções na tela do jogo.</string>
+    <string name="help_about_title">Sobre e atualizações</string>
+    <string name="help_about_body">A seção Sobre este aplicativo, nas Configurações, mostra a versão instalada e reúne os botões Verificar atualização, Abrir página do projeto no GitHub e Ajuda, que reabre esta apresentação.\n\nO jMud avisa automaticamente quando há uma nova versão: aparece uma janela com as novidades e a opção de baixar e instalar na hora.\n\nEste aplicativo é gratuito e de código aberto, criado especialmente para jogadores cegos. Sugestões e avisos de problemas são muito bem-vindos na página do projeto no GitHub ou pelo botão Enviar sugestão por e-mail, que escreve para augustoanacletoprojetos@gmail.com.\n\nBoa aventura, e bons jogos!</string>
 </resources>

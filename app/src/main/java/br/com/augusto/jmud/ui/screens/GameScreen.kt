@@ -92,8 +92,6 @@ fun GameScreen(viewModel: MudViewModel) {
         }
     }
 
-    var historyIndex by remember { mutableIntStateOf(-1) }
-    var commandDraft by remember { mutableStateOf("") }
     var reviewIndex by remember { mutableIntStateOf(-1) }
 
     var commandEditText by remember { mutableStateOf<EditText?>(null) }
@@ -124,8 +122,6 @@ fun GameScreen(viewModel: MudViewModel) {
             if (viewModel.isConnected.value) {
                 viewModel.sendMessage(finalCommand)
                 command = ""
-                historyIndex = -1
-                commandDraft = ""
                 reviewIndex = -1
                 commandEditText?.setText("")
                 commandEditText?.requestFocus()
@@ -380,10 +376,7 @@ fun GameScreen(viewModel: MudViewModel) {
 
                         AppTextField(
                             value = command,
-                            onValueChange = { newValue ->
-                                if (historyIndex != -1) historyIndex = -1
-                                command = newValue
-                            },
+                            onValueChange = { command = it },
                             modifier = Modifier.weight(1f),
                             label = stringResource(R.string.field_command),
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
@@ -404,36 +397,6 @@ fun GameScreen(viewModel: MudViewModel) {
                                             )
                                         }
                                         true
-                                    }
-                                    KeyEvent.KEYCODE_DPAD_UP -> {
-                                        val history = viewModel.commandHistory
-                                        if (keyEvent.action != KeyEvent.ACTION_DOWN || history.isEmpty()) {
-                                            false
-                                        } else {
-                                            if (historyIndex == -1) {
-                                                commandDraft = command
-                                                historyIndex = history.size - 1
-                                            } else if (historyIndex > 0) {
-                                                historyIndex--
-                                            }
-                                            command = history[historyIndex]
-                                            true
-                                        }
-                                    }
-                                    KeyEvent.KEYCODE_DPAD_DOWN -> {
-                                        val history = viewModel.commandHistory
-                                        if (keyEvent.action != KeyEvent.ACTION_DOWN || historyIndex == -1) {
-                                            false
-                                        } else {
-                                            if (historyIndex < history.size - 1) {
-                                                historyIndex++
-                                                command = history[historyIndex]
-                                            } else {
-                                                historyIndex = -1
-                                                command = commandDraft
-                                            }
-                                            true
-                                        }
                                     }
                                     else -> false
                                 }
@@ -552,6 +515,10 @@ fun GameScreen(viewModel: MudViewModel) {
                     } else {
                         showDownloadDialog = true
                     }
+                },
+                onHelp = {
+                    showMoreOptions = false
+                    viewModel.openHelp(HelpPages.GAME)
                 },
                 onImportZip = {
                     showMoreOptions = false

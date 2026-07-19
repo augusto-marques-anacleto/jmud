@@ -32,6 +32,7 @@ fun MoreOptionsDialog(
     onTimersEnabledChange: (Boolean) -> Unit,
     onDownloadSoundPack: () -> Unit,
     onImportZip: () -> Unit,
+    onHelp: () -> Unit,
     disconnectLabel: String,
     onDisconnect: () -> Unit,
     onDismiss: () -> Unit
@@ -59,6 +60,11 @@ fun MoreOptionsDialog(
                 AppButton(
                     text = stringResource(R.string.import_zip_pack),
                     onClick = onImportZip,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                AppButton(
+                    text = stringResource(R.string.help_game_button),
+                    onClick = onHelp,
                     modifier = Modifier.fillMaxWidth()
                 )
                 AppButton(

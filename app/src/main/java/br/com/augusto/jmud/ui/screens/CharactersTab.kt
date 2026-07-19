@@ -75,6 +75,10 @@ fun CharactersTab(viewModel: MudViewModel, context: Context) {
                     onClick = { showAddDialog = true },
                     modifier = Modifier.weight(1f)
                 )
+                AppButton(
+                    text = stringResource(R.string.help_button),
+                    onClick = { viewModel.openHelp(HelpPages.CHARACTERS) }
+                )
             }
 
             HorizontalDivider()

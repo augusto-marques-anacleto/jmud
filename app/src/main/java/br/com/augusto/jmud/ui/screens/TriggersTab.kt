@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -49,6 +50,7 @@ import java.util.UUID
 @Composable
 fun TriggersTab(viewModel: MudViewModel) {
     var showAddDialog by remember { mutableStateOf(false) }
+    var showHelpDialog by remember { mutableStateOf(false) }
     var triggerOptions by remember { mutableStateOf<MudTrigger?>(null) }
     var triggerToEdit by remember { mutableStateOf<MudTrigger?>(null) }
 
@@ -57,12 +59,17 @@ fun TriggersTab(viewModel: MudViewModel) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 AppButton(
                     text = stringResource(R.string.add_trigger),
                     onClick = { showAddDialog = true },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.weight(1f)
+                )
+                AppButton(
+                    text = stringResource(R.string.trigger_help_button),
+                    onClick = { showHelpDialog = true }
                 )
             }
 
@@ -130,6 +137,10 @@ fun TriggersTab(viewModel: MudViewModel) {
             )
         }
 
+        if (showHelpDialog) {
+            TriggerHelpDialog(onDismiss = { showHelpDialog = false })
+        }
+
         if (showAddDialog) {
             TriggerDialog(
                 initialTrigger = null,
@@ -154,6 +165,92 @@ fun TriggersTab(viewModel: MudViewModel) {
             )
         }
     }
+}
+
+@Composable
+private fun TriggerHelpDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.trigger_help_title)) },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.trigger_help_intro),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                HelpSectionTitle(stringResource(R.string.trigger_help_types_title))
+                Text(
+                    text = stringResource(R.string.trigger_help_type_start),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.trigger_help_type_contains),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.trigger_help_type_end),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.trigger_help_type_exact),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.trigger_help_type_pattern),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                HelpSectionTitle(stringResource(R.string.trigger_help_pattern_title))
+                Text(
+                    text = stringResource(R.string.trigger_help_pattern_body),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                HelpSectionTitle(stringResource(R.string.trigger_help_variables_title))
+                Text(
+                    text = stringResource(R.string.trigger_help_variables_body),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                HelpSectionTitle(stringResource(R.string.trigger_help_examples_title))
+                Text(
+                    text = stringResource(R.string.trigger_help_example_start),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.trigger_help_example_pattern),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.trigger_help_example_number),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.trigger_help_example_sound),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.trigger_help_example_ignore),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        },
+        confirmButton = {
+            AppButton(
+                text = stringResource(R.string.action_close),
+                onClick = onDismiss
+            )
+        }
+    )
+}
+
+@Composable
+private fun HelpSectionTitle(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.semantics { heading() }
+    )
 }
 
 @Composable

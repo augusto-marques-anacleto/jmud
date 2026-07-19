@@ -135,6 +135,7 @@ object MudConnectionManager {
                 activeSocket.tcpNoDelay = true
                 socket = activeSocket
 
+                _events.emit(MudEvent.Connected)
                 listenForMessages(activeSocket)
             } catch (e: Exception) {
                 _events.emit(MudEvent.ConnectionFailed(e.message))

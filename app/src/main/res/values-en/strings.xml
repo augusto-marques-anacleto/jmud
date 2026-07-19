@@ -67,6 +67,9 @@
     <string name="encoding_iso">ISO-8859-1 (MUD standard)</string>
     <string name="encoding_utf8_warning">Most MUDs use the ISO-8859-1 encoding. If this game does not support UTF-8, accented characters may come out wrong, especially in the commands you send. Use UTF-8 anyway?</string>
     <string name="encoding_utf8_confirm">Yes, use UTF-8</string>
+    <string name="settings_commands">Commands</string>
+    <string name="command_separator_label">Command separator</string>
+    <string name="command_separator_description">Send several commands at once by separating them with this text. The default is space, at sign, space. Leave the field empty to disable.</string>
     <string name="settings_tts">Speech synthesizer</string>
     <string name="tts_engine_value">Speech engine: %1$s</string>
     <string name="tts_engine_title">Speech engine</string>
@@ -166,6 +169,26 @@
     <string name="timers_enabled_switch">Timers enabled</string>
     <string name="trigger_disabled_suffix">" (disabled)"</string>
 
+    <string name="trigger_help_button">Help</string>
+    <string name="trigger_help_title">How to create triggers</string>
+    <string name="trigger_help_intro">A trigger watches every line that arrives from the game. When a line matches the configured message, the trigger acts on its own: it can send commands, play a sound from the pack, save the line into a named history, or hide the line. Matching ignores upper and lower case.</string>
+    <string name="trigger_help_types_title">Match types</string>
+    <string name="trigger_help_type_start">Match at start: fires when the line begins with the message. Example: the message \"You are hungry\" fires on the line \"You are hungry and weak.\"</string>
+    <string name="trigger_help_type_contains">Match anywhere: fires when the message appears anywhere in the line. Example: the message \"arrives from\" fires on \"A merchant arrives from the north.\"</string>
+    <string name="trigger_help_type_end">Match at end: fires when the line ends with the message. Example: the message \"shouts at you!\" fires on \"The guard shouts at you!\"</string>
+    <string name="trigger_help_type_exact">Whole line: fires only when the entire line is exactly equal to the message.</string>
+    <string name="trigger_help_type_pattern">Wildcard pattern: the message describes the whole line using symbols that match the parts that vary. It is the most powerful type; see the wildcards below.</string>
+    <string name="trigger_help_pattern_title">Pattern wildcards</string>
+    <string name="trigger_help_pattern_body">In the wildcard pattern type, the asterisk (*) matches any stretch of text, the at sign (@) matches one word, the ampersand (&amp;) matches a number, and the question mark (?) matches a single character. Each wildcard captures what it matched and becomes $1, $2, $3 and so on, in the order it appears, for use in the commands. The pattern must describe the entire line, from start to end. To search for one of these symbols literally, write a backslash before it, such as \\*.</string>
+    <string name="trigger_help_variables_title">Variables in commands</string>
+    <string name="trigger_help_variables_body">In the commands, $0 is the whole line and $1 to $9 are the pieces captured by the pattern wildcards. There are also $s, $t, $u and so on up to $y: counting the words from the point in the line where the match happened, $s is the second word, $t is the third, and so on. $z inserts a line break, separating two commands. Each line of the commands field is sent as a separate command.</string>
+    <string name="trigger_help_examples_title">Complete examples</string>
+    <string name="trigger_help_example_start">Eat when hungry. Message: \"You are hungry\", match at start. Commands, one per line: \"get bread bag\" and \"eat bread\".</string>
+    <string name="trigger_help_example_pattern">Look at whoever arrives. Message: \"* arrives from the *.\", wildcard pattern. On the line \"A merchant arrives from the north.\", $1 becomes \"A merchant\" and $2 becomes \"north\". Command: \"look $1\".</string>
+    <string name="trigger_help_example_number">Store received coins. Message: \"You receive &amp; coin*\", wildcard pattern. On the line \"You receive 50 gold coins.\", $1 becomes \"50\". Command: \"deposit $1 coins\".</string>
+    <string name="trigger_help_example_sound">Danger sound alert. Message: \"shouts at you!\", match at end, with the sound name field set to a sound from the pack, for example \"alert\". The sound plays whenever someone shouts at you.</string>
+    <string name="trigger_help_example_ignore">Silence repetitive messages. Message: \"The rain keeps falling\", match at start, with the ignore in history option enabled. The line is neither shown in the history nor spoken.</string>
+
     <string name="open_link_title">Open link</string>
     <string name="open_link_question">Do you want to open this link in the browser?</string>
     <string name="action_open">Open</string>
@@ -208,4 +231,64 @@
     <string name="logs_delete_confirm">Delete all saved logs? This action cannot be undone.</string>
     <string name="logs_delete_confirm_yes">Yes, delete</string>
     <string name="logs_deleted">Logs deleted.</string>
+
+    <string name="settings_manage_sounds">Manage sounds</string>
+    <string name="manage_sounds_description">Sound folders live in the device\'s internal storage, inside the Documents folder, in the jMud folder. Here you can create and delete folders and assign a folder to a character.</string>
+    <string name="sound_folders_button">Sound folders</string>
+    <string name="create_sound_folder">Create sound folder</string>
+    <string name="no_sound_folders">No sound folders found. Create a folder here or install a sound pack through the More options button on the game screen.</string>
+    <plurals name="folder_files_count">
+        <item quantity="one">%d sound file</item>
+        <item quantity="other">%d sound files</item>
+    </plurals>
+    <string name="folder_used_by">Used by characters: %1$s.</string>
+    <string name="folder_used_by_none">No character uses this folder.</string>
+    <string name="assign_to_character">Assign to a character</string>
+    <string name="delete_folder">Delete folder</string>
+    <string name="delete_folder_confirm">Delete the folder %1$s and all files inside it? This action cannot be undone.</string>
+    <string name="delete_folder_used_warning">Warning: the characters %1$s use this folder and will be left without a sounds folder.</string>
+    <string name="delete_folder_confirm_yes">Yes, delete</string>
+    <string name="assign_folder_title">Assign the folder %1$s</string>
+    <string name="no_characters_to_assign">No characters saved. Create a character on the Characters tab first.</string>
+    <string name="assign_character_current">%1$s. Current folder: %2$s</string>
+    <string name="folder_assigned">Folder %1$s assigned to character %2$s.</string>
+    <string name="action_create">Create</string>
+    <string name="send_suggestion">Send a suggestion by e-mail</string>
+
+    <string name="settings_about">About this app</string>
+    <string name="open_github">Open the project page on GitHub</string>
+    <string name="help_button">Help</string>
+    <string name="open_app_help">App help</string>
+    <string name="help_game_button">Game screen help</string>
+    <string name="help_page_title">%1$s. Page %2$d of %3$d</string>
+    <string name="help_previous">Previous</string>
+    <string name="help_next">Next</string>
+
+    <string name="welcome_title">Welcome to jMud!</string>
+    <string name="welcome_message">Great to have you here! jMud has a complete help guide that presents every feature of the app, page by page: characters, the game screen, triggers, timers, sounds and much more. Would you like to explore the features now? You can also open this presentation at any time in Settings, in the About this app section.</string>
+    <string name="welcome_show">Explore the features</string>
+    <string name="welcome_later">Not now</string>
+
+    <string name="help_overview_title">Overview</string>
+    <string name="help_overview_body">jMud is a MUD client built to be fully accessible with screen readers. MUDs are multiplayer text games played over the internet: the server sends descriptions and events as text, and you play by typing commands.\n\nThe home screen has four tabs at the bottom: Characters, to save your games and connect; Triggers, to react automatically to game messages; Timers, to repeat commands at intervals; and Settings, to adjust speech, sounds, logs and backup.\n\nWhile playing, the same tabs appear at the top of the screen, so you can create triggers, timers and change settings without disconnecting.\n\nUse the Previous and Next buttons to move through this help. You can reopen it at any time in Settings, in the About this app section.</string>
+    <string name="help_characters_title">Characters and connection</string>
+    <string name="help_characters_body">On the Characters tab you save the games you play most. Tap Add and enter the character name, the server address, the port and, if you want, the password.\n\nWith automatic login enabled, jMud sends the name and password as soon as the connection is established, and you enter the game without typing anything. In the post-connection commands field you can list commands, one per line, to be sent right after login.\n\nEach character also stores its own speech and sound preferences, plus the sounds folder used by that game. With the Choose Folder button you select an existing folder or create a new one, and the app suggests a name based on the server address. Where the folders live and how to manage them is explained in detail on the Sounds and sound packs page of this help.\n\nTo connect, just tap the character in the list. A long press opens the edit and remove options; these actions are also available in the screen reader actions menu.\n\nThe Manual Connection button lets you connect to any server by entering just the address and port, without saving a character.</string>
+    <string name="help_game_title">Game screen</string>
+    <string name="help_game_body">The game screen shows the message history, the command field and the Send button.\n\nAt the top there are two switches: Speech, which controls whether incoming messages are spoken, and Sounds, which controls sound effects. The More options button gathers other actions: enabling or disabling triggers and timers, downloading or importing sound packs, and disconnecting.\n\nIn the history, you can read the messages line by line with your screen reader. The Scroll to end button jumps to the most recent messages, and Clear history clears the screen.\n\nType in the command field and tap Send. With the field empty, Send repeats the last command, which is handy for walking or repeating actions.\n\nIf you use a physical keyboard, the Playing with the keyboard page of this help explains the available shortcuts.\n\nA long press on the Send button opens the named histories, separate lists that triggers can feed, such as a chat channel or combat records. When a message contains a link, you can open it by tapping the line.</string>
+    <string name="help_keyboard_title">Playing with the keyboard</string>
+    <string name="help_keyboard_body">If you connect a physical keyboard to your device, jMud offers shortcuts to play quickly.\n\nWith focus on the command field: the Enter key sends what is written and, with the field empty, sends the last command again, which makes it easy to repeat actions and walk around the game. The Page Up and Page Down keys read the history line by line without taking focus away from the field: the review starts at the most recent message, Page Up goes back to earlier lines and Page Down moves forward to newer ones. Each line is announced by the screen reader. When you send a command, the review returns to the end of the history.\n\nWith focus on the history list: the up and down arrows read line by line, Page Up and Page Down jump ten lines at a time, Home goes to the first message, End goes to the last one and Escape returns focus to the command field.\n\nNote: keyboard usage in the app may vary depending on the keyboard and the screen reader in use, which can behave differently from each other.</string>
+    <string name="help_multi_commands_title">Several commands at once</string>
+    <string name="help_multi_commands_body">You can send several commands at once by separating them with space, at sign, space. For example: say good morning! @ say how are you? sends both commands in sequence, in the order they were written.\n\nThe at sign was chosen because it is easy to reach on a phone keyboard, but the separator is yours: in Settings, in the Commands section, you can change it to a semicolon or any other text, or leave the field empty to disable the feature.\n\nBecause the default separator includes the surrounding spaces, an at sign attached to another word, as in an e-mail address, does not split anything.</string>
+    <string name="help_triggers_title">Triggers</string>
+    <string name="help_triggers_body">Triggers are automatic reactions to game messages. When an incoming line matches the configured text, jMud can send commands in response, play a sound from your sounds folder, store the line in a named history, or ignore the line, silencing and hiding repetitive messages.\n\nEach trigger has a scope: it can apply to all games, to a specific server or to a single character. You can also disable a trigger without deleting it, or disable all of them at once through the More options button on the game screen.\n\nThe match types include starts with, contains, ends with, exact message and pattern with variables, which lets you capture parts of the message and use them in the response commands.\n\nThe Triggers tab has its own Help button with a detailed explanation of each type, the patterns and the variables, with several ready-made examples.</string>
+    <string name="help_timers_title">Timers</string>
+    <string name="help_timers_body">Timers send commands automatically at intervals while you are connected. When creating one, you set the interval in seconds and the commands, one per line.\n\nThey are useful to keep the connection alive in games that disconnect idle players, to repeat training actions, or for any routine that needs to happen regularly.\n\nLike triggers, each timer has a scope: all games, one server or a specific character. You can disable a timer individually by editing it, or disable all of them through the More options button on the game screen.\n\nTimers only run while the connection is open; when you disconnect, they all stop automatically.</string>
+    <string name="help_sounds_title">Sounds and sound packs</string>
+    <string name="help_sounds_body">jMud supports the MSP protocol, used by MUDs to play sound effects and music. When the game supports it and the Sounds switch is on, sounds play automatically during the session.\n\nWhere the folders live: in the device\'s internal storage there is a folder called Documents, and inside it the jMud folder. Each subfolder of the jMud folder is a sound folder. In a file manager, the path is Internal storage, then Documents, then jMud. Note: it is the Documents folder of the internal storage, not the Documents shortcut shown on the home screen of some file managers.\n\nHow the client uses the folders: each character has an assigned sound folder, chosen when creating or editing the character, which keeps each game\'s sounds separate. When the game or a trigger asks for a sound by name, jMud looks for the file inside that character\'s folder, automatically completing the wav, mp3 and ogg extensions. Sounds the server sends by internet address are downloaded once and kept in a cache.\n\nTo install sounds, use the More options button on the game screen: Download sound pack downloads and installs a pack from a link, and Import ZIP pack installs a file already on your device. Many sound-enabled MUDs distribute these packs on their websites.\n\nTo keep everything organized, the Manage sounds section in Settings lists your folders with the number of files in each one, shows which characters use each folder, and lets you create a folder, delete a folder and assign a folder to a character without editing the character.\n\nTriggers can also play a sound by file name, which lets you create your own sound alerts even in games without MSP.</string>
+    <string name="help_logs_title">Session logs</string>
+    <string name="help_logs_body">jMud can record everything that happens in each game session: the messages received and the commands sent. Logs are organized by session, with date and time, character and server.\n\nIn the Logs section of Settings you turn recording on or off, choose how many days the files are kept, from seven days to never delete, and can delete them all at once.\n\nLogs are useful to reread a scene, review a fight or keep important conversations.</string>
+    <string name="help_backup_title">Backup</string>
+    <string name="help_backup_body">In the Backup section of Settings you can export all your data to a single file with the jmud extension: characters, triggers, timers and preferences.\n\nKeep this file somewhere safe, such as your favorite cloud service. When switching devices or reinstalling the app, use Import backup to restore everything at once.\n\nWarning: importing replaces your current data with the data from the file. Sound files are not included in the backup; if needed, reinstall the sound packs through the More options button on the game screen.</string>
+    <string name="help_about_title">About and updates</string>
+    <string name="help_about_body">The About this app section, in Settings, shows the installed version and gathers the Check for update, Open the project page on GitHub and Help buttons, the last one reopening this presentation.\n\njMud notifies you automatically when a new version is available: a window appears with the news and the option to download and install it right away.\n\nThis app is free and open source, created especially for blind players. Suggestions and problem reports are very welcome on the project page on GitHub or through the Send a suggestion by e-mail button, which writes to augustoanacletoprojetos@gmail.com.\n\nGood adventure, and happy gaming!</string>
 </resources>

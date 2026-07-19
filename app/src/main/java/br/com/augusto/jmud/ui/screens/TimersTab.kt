@@ -57,12 +57,17 @@ fun TimersTab(viewModel: MudViewModel) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 AppButton(
                     text = stringResource(R.string.add_timer),
                     onClick = { showAddDialog = true },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.weight(1f)
+                )
+                AppButton(
+                    text = stringResource(R.string.help_button),
+                    onClick = { viewModel.openHelp(HelpPages.TIMERS) }
                 )
             }
 

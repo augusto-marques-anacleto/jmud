@@ -42,6 +42,19 @@ fun AppNavigation(viewModel: MudViewModel) {
         GameScreen(viewModel)
     }
 
+    val helpPage = viewModel.helpStartPage.value
+    if (helpPage != null) {
+        GeneralHelpDialog(
+            startPage = helpPage,
+            onDismiss = { viewModel.closeHelp() }
+        )
+    } else if (viewModel.welcomeVisible.value) {
+        WelcomeDialog(
+            onExplore = { viewModel.dismissWelcome(showHelp = true) },
+            onDismiss = { viewModel.dismissWelcome(showHelp = false) }
+        )
+    }
+
     val packProgress = viewModel.soundPackProgress.value
     if (packProgress != null && viewModel.soundPackDialogVisible.value) {
         SoundPackProgressDialog(

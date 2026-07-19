@@ -30,6 +30,7 @@ import br.com.augusto.jmud.BuildConfig
 import br.com.augusto.jmud.R
 import br.com.augusto.jmud.ui.components.AppButton
 import br.com.augusto.jmud.ui.components.AppSlider
+import br.com.augusto.jmud.ui.components.AppTextField
 import br.com.augusto.jmud.ui.components.RadioRow
 import br.com.augusto.jmud.ui.viewmodels.MudViewModel
 import java.text.DecimalFormat
@@ -95,6 +96,24 @@ fun SettingsTab(viewModel: MudViewModel) {
                     showUtf8Warning = true
                 }
             }
+        )
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+        Text(
+            text = stringResource(R.string.settings_commands),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.semantics { heading() }
+        )
+        Text(
+            text = stringResource(R.string.command_separator_description),
+            style = MaterialTheme.typography.bodyLarge
+        )
+        AppTextField(
+            value = viewModel.commandSeparator.value,
+            onValueChange = { viewModel.setCommandSeparatorSetting(it) },
+            label = stringResource(R.string.command_separator_label),
+            modifier = Modifier.fillMaxWidth()
         )
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -203,6 +222,10 @@ fun SettingsTab(viewModel: MudViewModel) {
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
+        ManageSoundsSection(viewModel)
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
         Text(
             text = stringResource(R.string.settings_backup),
             style = MaterialTheme.typography.titleLarge,
@@ -229,7 +252,7 @@ fun SettingsTab(viewModel: MudViewModel) {
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
         Text(
-            text = stringResource(R.string.settings_updates),
+            text = stringResource(R.string.settings_about),
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.semantics { heading() }
         )
@@ -240,6 +263,23 @@ fun SettingsTab(viewModel: MudViewModel) {
         AppButton(
             text = stringResource(R.string.check_updates),
             onClick = { viewModel.checkForUpdates() },
+            modifier = Modifier.fillMaxWidth()
+        )
+        val githubUrl = stringResource(R.string.github_url)
+        AppButton(
+            text = stringResource(R.string.open_github),
+            onClick = { viewModel.openLink(githubUrl) },
+            modifier = Modifier.fillMaxWidth()
+        )
+        val suggestionEmail = stringResource(R.string.suggestion_email)
+        AppButton(
+            text = stringResource(R.string.send_suggestion),
+            onClick = { viewModel.openLink("mailto:$suggestionEmail") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        AppButton(
+            text = stringResource(R.string.open_app_help),
+            onClick = { viewModel.openHelp(HelpPages.OVERVIEW) },
             modifier = Modifier.fillMaxWidth()
         )
     }

@@ -86,4 +86,16 @@ class SettingsRepository(context: Context) {
     }
 
     fun getTimersEnabled(): Boolean = prefs.getBoolean("timers_enabled", true)
+
+    fun saveCommandSeparator(value: String) {
+        prefs.edit().putString("command_separator", value).apply()
+    }
+
+    fun getCommandSeparator(): String = prefs.getString("command_separator", " @ ") ?: " @ "
+
+    fun saveWelcomeShown() {
+        prefs.edit().putBoolean("welcome_shown", true).apply()
+    }
+
+    fun getWelcomeShown(): Boolean = prefs.getBoolean("welcome_shown", false)
 }

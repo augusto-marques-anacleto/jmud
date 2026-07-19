@@ -66,7 +66,6 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
     val timers = mutableStateListOf<MudTimer>()
     val triggers = mutableStateListOf<MudTrigger>()
     val gameMessages = mutableStateListOf<String>()
-    val commandHistory = mutableStateListOf<String>()
     val namedHistories = mutableStateMapOf<String, SnapshotStateList<String>>()
     val announcements = MutableSharedFlow<String>(
         extraBufferCapacity = 256,
@@ -104,14 +103,19 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
     var logRetentionDays = mutableStateOf(settingsRepository.getLogRetentionDays())
     var triggersEnabled = mutableStateOf(settingsRepository.getTriggersEnabled())
     var timersEnabled = mutableStateOf(settingsRepository.getTimersEnabled())
+    var commandSeparator = mutableStateOf(settingsRepository.getCommandSeparator())
     var backupMessage = mutableStateOf<String?>(null)
     var logsMessage = mutableStateOf<String?>(null)
+
+    var welcomeVisible = mutableStateOf(!settingsRepository.getWelcomeShown())
+    var helpStartPage = mutableStateOf<Int?>(null)
 
     var availableUpdate = mutableStateOf<UpdateInfo?>(null)
     var updateDialogVisible = mutableStateOf(false)
     var updateDownloadPercent = mutableStateOf<Int?>(null)
     var updateMessage = mutableStateOf<String?>(null)
     private var updateJob: Job? = null
+    private var autoLoginJob: Job? = null
 
     init {
         characters.addAll(repository.loadCharacters())
@@ -136,6 +140,7 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             MudConnectionManager.events.collect { event ->
                 when (event) {
+                    MudEvent.Connected -> onConnected()
                     is MudEvent.LineReceived -> onLineReceived(event.text)
                     is MudEvent.ConnectionFailed -> {
                         postStatusMessage(getString(R.string.connection_error, event.detail ?: ""))
@@ -254,7 +259,32 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private fun onConnected() {
+        val character = activeCharacter.value ?: return
+        autoLoginJob?.cancel()
+        autoLoginJob = viewModelScope.launch {
+            delay(500)
+            if (character.autoLogin && character.name.isNotBlank() && character.password.isNotBlank()) {
+                if (!isConnected.value) return@launch
+                transmit(character.name.trim())
+                delay(500)
+                if (!isConnected.value) return@launch
+                transmit(character.password)
+                delay(500)
+            }
+            for (cmd in character.postConnectCommands.split("\n")) {
+                if (cmd.isNotBlank()) {
+                    if (!isConnected.value) return@launch
+                    transmit(cmd.trim())
+                    delay(300)
+                }
+            }
+        }
+    }
+
     private fun onDisconnected() {
+        autoLoginJob?.cancel()
+        autoLoginJob = null
         if (!isConnected.value) return
         isConnected.value = false
         stopTimers()
@@ -425,6 +455,76 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
 
     fun testVoice() {
         ttsManager.speak(getString(R.string.test_voice_message, getString(R.string.app_name)), true)
+    }
+
+    fun soundFolders(): List<String> =
+        AppStorage.baseDir(getApplication()).listFiles()
+            ?.filter { it.isDirectory && it.name != "Logs" }
+            ?.map { it.name }
+            ?.sortedBy { it.lowercase() }
+            ?: emptyList()
+
+    fun createSoundFolder(name: String): Boolean {
+        val cleaned = name.trim()
+        if (cleaned.isEmpty() || cleaned == "Logs") return false
+        val dir = File(AppStorage.baseDir(getApplication()), cleaned)
+        return dir.isDirectory || dir.mkdirs()
+    }
+
+    fun deleteSoundFolder(name: String) {
+        if (name.isBlank() || name == "Logs") return
+        File(AppStorage.baseDir(getApplication()), name).deleteRecursively()
+        var changed = false
+        for (index in characters.indices) {
+            if (characters[index].soundsFolder == name) {
+                characters[index] = characters[index].copy(soundsFolder = "")
+                changed = true
+            }
+        }
+        if (changed) {
+            repository.saveCharacters(characters)
+            val active = activeCharacter.value
+            if (active != null && active.soundsFolder == name) {
+                activeCharacter.value = active.copy(soundsFolder = "")
+                audioManager.setSoundsFolder("")
+            }
+        }
+    }
+
+    fun charactersUsingFolder(name: String): List<MudCharacter> =
+        characters.filter { it.soundsFolder == name }
+
+    fun assignSoundsFolder(character: MudCharacter, folder: String) {
+        updateCharacter(character.copy(soundsFolder = folder))
+        if (activeCharacter.value?.id == character.id) {
+            audioManager.setSoundsFolder(folder)
+        }
+    }
+
+    fun soundFolderFileCount(name: String): Int =
+        File(AppStorage.baseDir(getApplication()), name)
+            .walkTopDown()
+            .count { it.isFile }
+
+    fun openHelp(page: Int) {
+        helpStartPage.value = page
+    }
+
+    fun closeHelp() {
+        helpStartPage.value = null
+    }
+
+    fun dismissWelcome(showHelp: Boolean) {
+        welcomeVisible.value = false
+        settingsRepository.saveWelcomeShown()
+        if (showHelp) {
+            helpStartPage.value = 0
+        }
+    }
+
+    fun setCommandSeparatorSetting(value: String) {
+        commandSeparator.value = value
+        settingsRepository.saveCommandSeparator(value)
     }
 
     fun setLogsEnabledSetting(value: Boolean) {
@@ -779,39 +879,32 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
 
         MudConnectionManager.connect(getApplication(), character.host, character.port)
 
-        viewModelScope.launch {
-            delay(1000)
-            if (character.autoLogin && character.name.isNotBlank() && character.password.isNotBlank()) {
-                transmit(character.name.trim())
-                delay(500)
-                transmit(character.password)
-                delay(500)
-            }
-            for (cmd in character.postConnectCommands.split("\n")) {
-                if (cmd.isNotBlank()) {
-                    transmit(cmd.trim())
-                    delay(300)
-                }
-            }
-        }
-
         startTimers(character)
     }
 
     fun sendMessage(message: String) {
         if (message.isNotBlank()) {
             lastSentCommand.value = message
-            if (commandHistory.isEmpty() || commandHistory.last() != message) {
-                commandHistory.add(message)
-                if (commandHistory.size > 100) commandHistory.removeAt(0)
-            }
         }
         val finalCommand = if (message.isNotBlank()) message else lastSentCommand.value
 
         if (finalCommand.isNotBlank()) {
             userJustSentCommand.value = true
             flushNextTTS.value = true
-            transmit(finalCommand)
+            val separator = commandSeparator.value
+            val parts = if (separator.isNotEmpty()) {
+                finalCommand.split(separator).map { it.trim() }.filter { it.isNotEmpty() }
+            } else {
+                emptyList()
+            }
+            if (parts.size > 1) {
+                if (logsEnabled.value) {
+                    parts.forEach { logManager.logOutgoing(it) }
+                }
+                MudConnectionManager.sendMessage(parts.joinToString("\r\n"))
+            } else {
+                transmit(finalCommand)
+            }
         }
     }
 
@@ -825,13 +918,14 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun leaveGame() {
+        autoLoginJob?.cancel()
+        autoLoginJob = null
         stopTimers()
         ttsManager.stop()
         audioManager.stopAll()
         logManager.endSession()
         MudConnectionManager.disconnect(getApplication())
         isConnected.value = false
-        commandHistory.clear()
         lastSentCommand.value = ""
         userJustSentCommand.value = false
         currentScreen.value = AppScreen.MAIN
