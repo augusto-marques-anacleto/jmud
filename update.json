@@ -1,6 +1,6 @@
 {
-  "versionCode": 6,
-  "versionName": "1.5",
-  "url": "https://github.com/augusto-marques-anacleto/jmud/releases/download/v1.5/jMud.apk",
-  "changelog": "Leitura do histórico pelo teclado: setas leem linha por linha, Page Up e Page Down pulam 10 linhas, Home e End vão ao início e ao fim, Escape volta ao campo de comando. Sons MSP por URL agora ficam em cache e tocam sem atraso. Conexão mais estável em segundo plano. Aviso ao escolher UTF-8. Correções: o campo de comando não perde mais letras e o Enter do teclado numérico também envia."
+  "versionCode": 7,
+  "versionName": "1.6",
+  "url": "https://github.com/augusto-marques-anacleto/jmud/releases/download/v1.6/jMud.apk",
+  "changelog": "Login automático confiável: nome e senha só são enviados após a conexão ser estabelecida. Vários comandos de uma vez separados por espaço, arroba, espaço, com separador configurável nas Configurações. Ajuda completa com 11 páginas navegáveis e tela de boas-vindas. Nova seção Gerenciar sons: criar e excluir pastas e atribuir pasta a um personagem. Botões para o GitHub e para enviar sugestões por e-mail."
 }
