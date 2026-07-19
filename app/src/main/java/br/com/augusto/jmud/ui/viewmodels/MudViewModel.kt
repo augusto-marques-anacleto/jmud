@@ -818,9 +818,15 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private fun logOutgoingMasked(command: String) {
+        val password = activeCharacter.value?.password
+        val line = if (!password.isNullOrBlank() && command == password) "********" else command
+        logManager.logOutgoing(line)
+    }
+
     private fun transmit(command: String) {
         if (logsEnabled.value) {
-            logManager.logOutgoing(command)
+            logOutgoingMasked(command)
         }
         MudConnectionManager.sendMessage(command)
     }
@@ -899,7 +905,7 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
             }
             if (parts.size > 1) {
                 if (logsEnabled.value) {
-                    parts.forEach { logManager.logOutgoing(it) }
+                    parts.forEach { logOutgoingMasked(it) }
                 }
                 MudConnectionManager.sendMessage(parts.joinToString("\r\n"))
             } else {
