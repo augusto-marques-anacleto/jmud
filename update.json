@@ -1,6 +1,6 @@
 {
-  "versionCode": 7,
-  "versionName": "1.6",
-  "url": "https://github.com/augusto-marques-anacleto/jmud/releases/download/v1.6/jMud.apk",
-  "changelog": "Login automático confiável: nome e senha só são enviados após a conexão ser estabelecida. Vários comandos de uma vez separados por espaço, arroba, espaço, com separador configurável nas Configurações. Ajuda completa com 11 páginas navegáveis e tela de boas-vindas. Nova seção Gerenciar sons: criar e excluir pastas e atribuir pasta a um personagem. Botões para o GitHub e para enviar sugestões por e-mail."
+  "versionCode": 8,
+  "versionName": "1.7",
+  "url": "https://github.com/augusto-marques-anacleto/jmud/releases/download/v1.7/jMud.apk",
+  "changelog": "Nova aba Macros: comandos manuais disparados com #nome, com argumentos anexados automaticamente ou controlados por $1, $2 e $0, e gravação de sequências de comandos direto da tela do jogo, com pausar, retomar, ignorar o último comando e copiar tudo para a área de transferência antes de salvar. Corrigida a permissão de armazenamento não solicitada em versões antigas do Android, que impedia gravar sons sem aviso. Impede salvar um personagem com sons ativados sem pasta selecionada, e passa a checar permissão e pasta de sons antes de baixar ou importar um pacote de sons."
 }
