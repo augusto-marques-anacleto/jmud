@@ -39,6 +39,8 @@
     <string name="sounds_folder_none">Nenhuma</string>
     <string name="choose_folder">Escolher Pasta</string>
     <string name="choose_sounds_folder_title">Escolher Pasta de Sons</string>
+    <string name="sounds_folder_required_title">Pasta de sons necessária</string>
+    <string name="sounds_folder_required_message">Você marcou usar sons para este personagem. Selecione ou crie uma pasta de sons antes de salvar.</string>
     <string name="no_folders_found">Nenhuma pasta encontrada.</string>
     <string name="create_new_folder">Criar Nova Pasta</string>
     <string name="new_folder_title">Nome da Nova Pasta</string>
@@ -196,6 +198,42 @@
     <string name="trigger_help_example_sound">Alerta sonoro de perigo. Mensagem: \"grita com você!\", tipo busca no fim, campo nome de som preenchido com um som do pacote, por exemplo \"alerta\". O som toca sempre que alguém gritar com você.</string>
     <string name="trigger_help_example_ignore">Silenciar mensagens repetitivas. Mensagem: \"A chuva continua caindo\", tipo busca no início, com a opção ignorar no histórico ativada. A linha não aparece no histórico nem é falada.</string>
 
+    <string name="tab_macros">Macros</string>
+    <string name="add_macro">Adicionar Macro</string>
+    <string name="edit_macro_title">Editar Macro</string>
+    <string name="no_macros_saved">Nenhuma macro salva.</string>
+    <string name="field_macro_command_name">Nome do comando (sem o #)</string>
+    <string name="action_run">Executar</string>
+    <string name="macro_description" translatable="false">#%1$s — %2$s, %3$s</string>
+    <string name="record_macro_button">Gravar macro</string>
+    <string name="macro_recording_dialog_title">Gravação de macro</string>
+    <string name="macro_recording_status_format" translatable="false">%1$s — %2$s</string>
+    <string name="macro_recording_state_recording">Gravando</string>
+    <string name="macro_recording_state_paused">Pausada</string>
+    <string name="macro_recording_state_none">Nenhuma gravação em andamento</string>
+    <plurals name="macro_recorded_count">
+        <item quantity="one">%d comando gravado</item>
+        <item quantity="other">%d comandos gravados</item>
+    </plurals>
+    <string name="action_start_recording">Iniciar gravação</string>
+    <string name="action_pause_recording">Pausar gravação</string>
+    <string name="action_resume_recording">Retomar gravação</string>
+    <string name="action_ignore_last_command">Ignorar último comando</string>
+    <string name="action_stop_recording">Parar gravação</string>
+    <string name="save_macro_recording_title">Salvar gravação de macro</string>
+    <string name="copy_to_clipboard">Copiar para a área de transferência</string>
+    <string name="copied_to_clipboard_message">Comandos copiados para a área de transferência.</string>
+    <string name="discard_macro_recording">Descartar gravação</string>
+    <string name="macro_recording_started">Gravação de macro iniciada.</string>
+    <string name="macro_recording_paused">Gravação de macro pausada.</string>
+    <string name="macro_recording_resumed">Gravação de macro retomada.</string>
+    <string name="macro_recording_nothing_to_ignore">Não há mais nada para ignorar.</string>
+    <string name="macro_recording_discarded_empty">Nenhum comando foi gravado. Gravação descartada.</string>
+    <string name="macro_recording_saved">Macro \"%1$s\" salva.</string>
+    <string name="macro_not_found">Comando de macro \"%1$s\" não encontrado.</string>
+    <string name="help_macros_title">Macros</string>
+    <string name="help_macros_body">Macros são atalhos de comando que você cria. Existem duas formas de criar uma.\n\nComando manual: na aba Macros, defina um nome e uma lista de comandos, um por linha. Para executar, digite # seguido do nome durante o jogo, por exemplo #tapa. Se você digitar mais alguma coisa depois do nome, esse texto é adicionado automaticamente ao final do último comando. Por exemplo, uma macro chamada \"tt\" com o comando \"lan telep\", executada como #tt zanand, envia \"lan telep zanand\", sem precisar escrever nada especial no comando.\n\nPara quem quiser mais controle, isso é opcional: usando $1, $2 e assim por diante dentro dos comandos, cada um recebe uma palavra digitada depois do nome, e $0 recebe todo o texto de uma vez, o que permite posicionar o texto digitado no meio do comando ou repeti-lo em mais de uma linha. Quando os comandos já usam $1, $2 ou $0, o texto não é mais adicionado automaticamente ao final; a posição fica só onde você indicou.\n\nGravação: pelo botão Mais opções na tela do jogo, em Gravar macro, você grava uma sequência de comandos enquanto joga, útil para mapear uma área. Iniciar gravação começa a capturar cada comando que você enviar e volta direto para a tela do jogo, já pronta para digitar. Pausar gravação interrompe a captura sem perder o que já foi gravado, e o mesmo botão vira Retomar gravação para continuar depois. Ignorar último comando remove da gravação o comando mais recente, um de cada vez; quando não houver mais nada para remover, o aplicativo avisa. Parar gravação encerra a captura: se algum comando foi gravado, abre uma tela para nomear e salvar a macro, com a opção de copiar todos os comandos para a área de transferência antes de salvar.\n\nAssim como triggers e temporizadores, cada macro tem um escopo: todos os jogos, um servidor ou um personagem específico. Uma macro desativada não responde quando o nome é digitado.</string>
+
     <string name="open_link_title">Abrir link</string>
     <string name="open_link_question">Deseja abrir este link no navegador?</string>
     <string name="action_open">Abrir</string>
@@ -226,6 +264,9 @@
     </plurals>
     <string name="sound_pack_cancelled">Instalação do pacote de sons cancelada.</string>
     <string name="invalid_link">Link inválido.</string>
+    <string name="sound_pack_folder_required_message">Este personagem ainda não tem uma pasta de sons. Selecione ou crie uma pasta antes de continuar.</string>
+    <string name="sound_pack_permission_required_title">Permissão necessária</string>
+    <string name="sound_pack_permission_required_message">É necessário conceder a permissão de armazenamento para baixar ou importar pacotes de sons. Conceda a permissão e tente novamente.</string>
 
     <string name="connecting_to">Conectando a %1$s:%2$d...</string>
     <string name="connection_error">Erro de conexão: %1$s</string>
@@ -299,7 +340,7 @@
     <string name="help_logs_title">Logs de sessão</string>
     <string name="help_logs_body">O jMud pode gravar tudo o que acontece em cada sessão de jogo: as mensagens recebidas e os comandos enviados. Os logs são organizados por sessão, com data e hora, personagem e servidor.\n\nNa seção Logs das Configurações você ativa ou desativa a gravação, escolhe por quantos dias os arquivos ficam guardados, de sete dias a nunca apagar, e pode apagar todos de uma vez.\n\nOs logs são úteis para reler uma cena, conferir um combate ou guardar conversas importantes.</string>
     <string name="help_backup_title">Backup</string>
-    <string name="help_backup_body">Na seção Backup das Configurações você pode exportar todos os seus dados para um único arquivo com a extensão jmud: personagens, triggers, temporizadores e preferências.\n\nGuarde esse arquivo em um lugar seguro, como seu serviço de nuvem preferido. Ao trocar de aparelho ou reinstalar o aplicativo, use Importar backup para recuperar tudo de uma vez.\n\nAtenção: a importação substitui os dados atuais pelos do arquivo. Os arquivos de som não entram no backup; se precisar, reinstale os pacotes de sons pelo botão Mais opções na tela do jogo.</string>
+    <string name="help_backup_body">Na seção Backup das Configurações você pode exportar todos os seus dados para um único arquivo com a extensão jmud: personagens, triggers, temporizadores, macros e preferências.\n\nGuarde esse arquivo em um lugar seguro, como seu serviço de nuvem preferido. Ao trocar de aparelho ou reinstalar o aplicativo, use Importar backup para recuperar tudo de uma vez.\n\nAtenção: a importação substitui os dados atuais pelos do arquivo. Os arquivos de som não entram no backup; se precisar, reinstale os pacotes de sons pelo botão Mais opções na tela do jogo.</string>
     <string name="help_about_title">Sobre e atualizações</string>
     <string name="help_about_body">A seção Sobre este aplicativo, nas Configurações, mostra a versão instalada e reúne os botões Verificar atualização, Abrir página do projeto no GitHub e Ajuda, que reabre esta apresentação.\n\nO jMud avisa automaticamente quando há uma nova versão: aparece uma janela com as novidades e a opção de baixar e instalar na hora.\n\nEste aplicativo é gratuito e de código aberto, criado especialmente para jogadores cegos. Sugestões e avisos de problemas são muito bem-vindos na página do projeto no GitHub ou pelo botão Enviar sugestão por e-mail, que escreve para augustoanacletoprojetos@gmail.com.\n\nBoa aventura, e bons jogos!</string>
 </resources>

@@ -32,6 +32,7 @@ fun MoreOptionsDialog(
     onTimersEnabledChange: (Boolean) -> Unit,
     onDownloadSoundPack: () -> Unit,
     onImportZip: () -> Unit,
+    onRecordMacro: () -> Unit,
     onHelp: () -> Unit,
     disconnectLabel: String,
     onDisconnect: () -> Unit,
@@ -60,6 +61,11 @@ fun MoreOptionsDialog(
                 AppButton(
                     text = stringResource(R.string.import_zip_pack),
                     onClick = onImportZip,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                AppButton(
+                    text = stringResource(R.string.record_macro_button),
+                    onClick = onRecordMacro,
                     modifier = Modifier.fillMaxWidth()
                 )
                 AppButton(

@@ -61,9 +61,13 @@ import androidx.compose.ui.unit.dp
 import br.com.augusto.jmud.R
 import br.com.augusto.jmud.ui.components.AppButton
 import br.com.augusto.jmud.ui.components.AppTextField
+import br.com.augusto.jmud.ui.viewmodels.MacroRecordingState
 import br.com.augusto.jmud.ui.viewmodels.MudViewModel
+import br.com.augusto.jmud.util.StoragePermissions
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+private enum class PendingSoundAction { NONE, DOWNLOAD, IMPORT }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,6 +83,12 @@ fun GameScreen(viewModel: MudViewModel) {
     var gameTab by remember { mutableIntStateOf(0) }
     var showHistories by remember { mutableStateOf(false) }
     var historyToView by remember { mutableStateOf<String?>(null) }
+    var pendingSoundAction by remember { mutableStateOf(PendingSoundAction.NONE) }
+    var showSoundPackFolderRequired by remember { mutableStateOf(false) }
+    var showSoundPackPermissionRequired by remember { mutableStateOf(false) }
+    var showSoundPackFolderSelector by remember { mutableStateOf(false) }
+    var showMacroRecordingDialog by remember { mutableStateOf(false) }
+    var showSaveMacroRecordingDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val urlRegex = remember { Regex("https?://\\S+") }
@@ -89,6 +99,41 @@ fun GameScreen(viewModel: MudViewModel) {
     val zipPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null && pendingImportFolder.isNotBlank()) {
             viewModel.importSoundPack(uri, pendingImportFolder)
+        }
+    }
+
+    val continueSoundAction: () -> Unit = continueSoundAction@{
+        val action = pendingSoundAction
+        if (action == PendingSoundAction.NONE) return@continueSoundAction
+        if (viewModel.activeCharacter.value?.soundsFolder.isNullOrBlank()) {
+            showSoundPackFolderRequired = true
+            return@continueSoundAction
+        }
+        when (action) {
+            PendingSoundAction.DOWNLOAD -> showDownloadDialog = true
+            PendingSoundAction.IMPORT -> showImportDialog = true
+            PendingSoundAction.NONE -> {}
+        }
+        pendingSoundAction = PendingSoundAction.NONE
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        if (results.values.all { it }) {
+            continueSoundAction()
+        } else {
+            pendingSoundAction = PendingSoundAction.NONE
+            showSoundPackPermissionRequired = true
+        }
+    }
+
+    val startSoundAction: (PendingSoundAction) -> Unit = { action ->
+        pendingSoundAction = action
+        if (StoragePermissions.allGranted(context)) {
+            continueSoundAction()
+        } else {
+            permissionLauncher.launch(StoragePermissions.required())
         }
     }
 
@@ -164,8 +209,8 @@ fun GameScreen(viewModel: MudViewModel) {
         }
     }
 
-    LaunchedEffect(showBackConfirm, showDisconnectedSend) {
-        if (!showBackConfirm && !showDisconnectedSend) {
+    LaunchedEffect(showBackConfirm, showDisconnectedSend, showMacroRecordingDialog) {
+        if (!showBackConfirm && !showDisconnectedSend && !showMacroRecordingDialog) {
             commandEditText?.requestFocus()
         }
     }
@@ -212,6 +257,7 @@ fun GameScreen(viewModel: MudViewModel) {
                 stringResource(R.string.tab_game),
                 stringResource(R.string.tab_triggers),
                 stringResource(R.string.tab_timers),
+                stringResource(R.string.tab_macros),
                 stringResource(R.string.tab_settings)
             )
             TabRow(selectedTabIndex = gameTab) {
@@ -227,7 +273,8 @@ fun GameScreen(viewModel: MudViewModel) {
             when (gameTab) {
                 1 -> TriggersTab(viewModel)
                 2 -> TimersTab(viewModel)
-                3 -> SettingsTab(viewModel)
+                3 -> MacrosTab(viewModel)
+                4 -> SettingsTab(viewModel)
                 else -> Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -513,7 +560,7 @@ fun GameScreen(viewModel: MudViewModel) {
                     if (viewModel.isSoundPackRunning()) {
                         viewModel.showSoundPackDialog()
                     } else {
-                        showDownloadDialog = true
+                        startSoundAction(PendingSoundAction.DOWNLOAD)
                     }
                 },
                 onHelp = {
@@ -525,8 +572,12 @@ fun GameScreen(viewModel: MudViewModel) {
                     if (viewModel.isSoundPackRunning()) {
                         viewModel.showSoundPackDialog()
                     } else {
-                        showImportDialog = true
+                        startSoundAction(PendingSoundAction.IMPORT)
                     }
+                },
+                onRecordMacro = {
+                    showMoreOptions = false
+                    showMacroRecordingDialog = true
                 },
                 disconnectLabel = stringResource(
                     if (viewModel.isConnected.value) R.string.action_disconnect else R.string.back_to_home
@@ -632,6 +683,102 @@ fun GameScreen(viewModel: MudViewModel) {
                     zipPicker.launch(
                         arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream")
                     )
+                }
+            )
+        }
+
+        if (showSoundPackFolderRequired) {
+            AlertDialog(
+                onDismissRequest = {
+                    showSoundPackFolderRequired = false
+                    pendingSoundAction = PendingSoundAction.NONE
+                },
+                title = { Text(stringResource(R.string.sounds_folder_required_title)) },
+                text = { Text(stringResource(R.string.sound_pack_folder_required_message)) },
+                confirmButton = {
+                    AppButton(
+                        text = stringResource(R.string.choose_folder),
+                        onClick = {
+                            showSoundPackFolderRequired = false
+                            showSoundPackFolderSelector = true
+                        }
+                    )
+                },
+                dismissButton = {
+                    AppButton(
+                        text = stringResource(R.string.action_cancel),
+                        onClick = {
+                            showSoundPackFolderRequired = false
+                            pendingSoundAction = PendingSoundAction.NONE
+                        }
+                    )
+                }
+            )
+        }
+
+        if (showSoundPackFolderSelector) {
+            FolderSelectorDialog(
+                context = context,
+                host = suggestHost,
+                name = suggestName,
+                onDismiss = {
+                    showSoundPackFolderSelector = false
+                    pendingSoundAction = PendingSoundAction.NONE
+                },
+                onFolderSelected = { selected ->
+                    showSoundPackFolderSelector = false
+                    viewModel.activeCharacter.value?.let { viewModel.assignSoundsFolder(it, selected) }
+                    continueSoundAction()
+                }
+            )
+        }
+
+        if (showSoundPackPermissionRequired) {
+            AlertDialog(
+                onDismissRequest = { showSoundPackPermissionRequired = false },
+                title = { Text(stringResource(R.string.sound_pack_permission_required_title)) },
+                text = { Text(stringResource(R.string.sound_pack_permission_required_message)) },
+                confirmButton = {
+                    AppButton(
+                        text = stringResource(R.string.action_close),
+                        onClick = { showSoundPackPermissionRequired = false }
+                    )
+                },
+                dismissButton = {}
+            )
+        }
+
+        if (showMacroRecordingDialog) {
+            MacroRecordingDialog(
+                state = viewModel.macroRecordingState.value,
+                recordedCount = viewModel.recordedMacroCommands.size,
+                onStart = {
+                    viewModel.startMacroRecording()
+                    showMacroRecordingDialog = false
+                },
+                onTogglePause = { viewModel.toggleMacroRecordingPause() },
+                onIgnoreLast = { viewModel.ignoreLastRecordedMacroCommand() },
+                onStop = {
+                    showMacroRecordingDialog = false
+                    if (viewModel.stopMacroRecording()) {
+                        showSaveMacroRecordingDialog = true
+                    }
+                },
+                onDismiss = { showMacroRecordingDialog = false }
+            )
+        }
+
+        if (showSaveMacroRecordingDialog) {
+            SaveMacroRecordingDialog(
+                recordedCommands = viewModel.recordedMacroCommands.toList(),
+                characters = viewModel.characters,
+                onDismiss = {
+                    showSaveMacroRecordingDialog = false
+                    viewModel.discardMacroRecording()
+                },
+                onSave = { name, commands, scope, scopeValue ->
+                    showSaveMacroRecordingDialog = false
+                    viewModel.saveMacroRecording(name, commands, scope, scopeValue)
                 }
             )
         }

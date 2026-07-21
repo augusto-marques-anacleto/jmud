@@ -36,6 +36,8 @@
     <string name="sounds_folder_none">None</string>
     <string name="choose_folder">Choose Folder</string>
     <string name="choose_sounds_folder_title">Choose Sounds Folder</string>
+    <string name="sounds_folder_required_title">Sounds folder required</string>
+    <string name="sounds_folder_required_message">You enabled sounds for this character. Select or create a sounds folder before saving.</string>
     <string name="no_folders_found">No folders found.</string>
     <string name="create_new_folder">Create New Folder</string>
     <string name="new_folder_title">New Folder Name</string>
@@ -189,6 +191,42 @@
     <string name="trigger_help_example_sound">Danger sound alert. Message: \"shouts at you!\", match at end, with the sound name field set to a sound from the pack, for example \"alert\". The sound plays whenever someone shouts at you.</string>
     <string name="trigger_help_example_ignore">Silence repetitive messages. Message: \"The rain keeps falling\", match at start, with the ignore in history option enabled. The line is neither shown in the history nor spoken.</string>
 
+    <string name="tab_macros">Macros</string>
+    <string name="add_macro">Add Macro</string>
+    <string name="edit_macro_title">Edit Macro</string>
+    <string name="no_macros_saved">No macros saved.</string>
+    <string name="field_macro_command_name">Command name (without the #)</string>
+    <string name="action_run">Run</string>
+    <string name="macro_description" translatable="false">#%1$s — %2$s, %3$s</string>
+    <string name="record_macro_button">Record macro</string>
+    <string name="macro_recording_dialog_title">Macro recording</string>
+    <string name="macro_recording_status_format" translatable="false">%1$s — %2$s</string>
+    <string name="macro_recording_state_recording">Recording</string>
+    <string name="macro_recording_state_paused">Paused</string>
+    <string name="macro_recording_state_none">No recording in progress</string>
+    <plurals name="macro_recorded_count">
+        <item quantity="one">%d command recorded</item>
+        <item quantity="other">%d commands recorded</item>
+    </plurals>
+    <string name="action_start_recording">Start recording</string>
+    <string name="action_pause_recording">Pause recording</string>
+    <string name="action_resume_recording">Resume recording</string>
+    <string name="action_ignore_last_command">Ignore last command</string>
+    <string name="action_stop_recording">Stop recording</string>
+    <string name="save_macro_recording_title">Save macro recording</string>
+    <string name="copy_to_clipboard">Copy to clipboard</string>
+    <string name="copied_to_clipboard_message">Commands copied to clipboard.</string>
+    <string name="discard_macro_recording">Discard recording</string>
+    <string name="macro_recording_started">Macro recording started.</string>
+    <string name="macro_recording_paused">Macro recording paused.</string>
+    <string name="macro_recording_resumed">Macro recording resumed.</string>
+    <string name="macro_recording_nothing_to_ignore">There is nothing left to ignore.</string>
+    <string name="macro_recording_discarded_empty">No command was recorded. Recording discarded.</string>
+    <string name="macro_recording_saved">Macro \"%1$s\" saved.</string>
+    <string name="macro_not_found">Macro command \"%1$s\" not found.</string>
+    <string name="help_macros_title">Macros</string>
+    <string name="help_macros_body">Macros are command shortcuts you create. There are two ways to create one.\n\nManual command: on the Macros tab, set a name and a list of commands, one per line. To run it, type # followed by the name during the game, for example #tapa. If you type anything else after the name, that text is automatically appended to the end of the last command. For example, a macro named \"tt\" with the command \"lan telep\", run as #tt zanand, sends \"lan telep zanand\", with nothing special to write in the command.\n\nFor more control, this is optional: using $1, $2 and so on inside the commands, each one receives a word typed after the name, and $0 receives the whole typed text at once, which lets you place the typed text in the middle of a command or repeat it across more than one line. Once the commands already use $1, $2 or $0, the text is no longer appended automatically; it only goes where you placed it.\n\nRecording: through the More options button on the game screen, under Record macro, you record a sequence of commands while playing, useful for mapping an area. Start recording begins capturing every command you send and takes you straight back to the game screen, ready to type. Pause recording stops capturing without losing what was already recorded, and the same button turns into Resume recording to continue later. Ignore last command removes the most recent recorded command, one at a time; once there is nothing left to remove, the app lets you know. Stop recording ends the capture: if any command was recorded, a screen opens to name and save the macro, with the option to copy all commands to the clipboard before saving.\n\nLike triggers and timers, each macro has a scope: all games, one server or a specific character. A disabled macro does not respond when its name is typed.</string>
+
     <string name="open_link_title">Open link</string>
     <string name="open_link_question">Do you want to open this link in the browser?</string>
     <string name="action_open">Open</string>
@@ -217,6 +255,9 @@
     </plurals>
     <string name="sound_pack_cancelled">Sound pack installation cancelled.</string>
     <string name="invalid_link">Invalid link.</string>
+    <string name="sound_pack_folder_required_message">This character doesn\'t have a sounds folder yet. Select or create one before continuing.</string>
+    <string name="sound_pack_permission_required_title">Permission required</string>
+    <string name="sound_pack_permission_required_message">Storage permission is required to download or import sound packs. Grant the permission and try again.</string>
 
     <string name="connecting_to">Connecting to %1$s:%2$d...</string>
     <string name="connection_error">Connection error: %1$s</string>
@@ -288,7 +329,7 @@
     <string name="help_logs_title">Session logs</string>
     <string name="help_logs_body">jMud can record everything that happens in each game session: the messages received and the commands sent. Logs are organized by session, with date and time, character and server.\n\nIn the Logs section of Settings you turn recording on or off, choose how many days the files are kept, from seven days to never delete, and can delete them all at once.\n\nLogs are useful to reread a scene, review a fight or keep important conversations.</string>
     <string name="help_backup_title">Backup</string>
-    <string name="help_backup_body">In the Backup section of Settings you can export all your data to a single file with the jmud extension: characters, triggers, timers and preferences.\n\nKeep this file somewhere safe, such as your favorite cloud service. When switching devices or reinstalling the app, use Import backup to restore everything at once.\n\nWarning: importing replaces your current data with the data from the file. Sound files are not included in the backup; if needed, reinstall the sound packs through the More options button on the game screen.</string>
+    <string name="help_backup_body">In the Backup section of Settings you can export all your data to a single file with the jmud extension: characters, triggers, timers, macros and preferences.\n\nKeep this file somewhere safe, such as your favorite cloud service. When switching devices or reinstalling the app, use Import backup to restore everything at once.\n\nWarning: importing replaces your current data with the data from the file. Sound files are not included in the backup; if needed, reinstall the sound packs through the More options button on the game screen.</string>
     <string name="help_about_title">About and updates</string>
     <string name="help_about_body">The About this app section, in Settings, shows the installed version and gathers the Check for update, Open the project page on GitHub and Help buttons, the last one reopening this presentation.\n\njMud notifies you automatically when a new version is available: a window appears with the news and the option to download and install it right away.\n\nThis app is free and open source, created especially for blind players. Suggestions and problem reports are very welcome on the project page on GitHub or through the Send a suggestion by e-mail button, which writes to augustoanacletoprojetos@gmail.com.\n\nGood adventure, and happy gaming!</string>
 </resources>

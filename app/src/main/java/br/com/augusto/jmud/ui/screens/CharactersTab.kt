@@ -342,8 +342,32 @@ fun AddCharacterDialog(
     var playSounds by remember { mutableStateOf(initialCharacter?.playSounds ?: true) }
     var soundsFolder by remember { mutableStateOf(initialCharacter?.soundsFolder ?: "") }
     var showFolderSelector by remember { mutableStateOf(false) }
+    var showSoundsFolderRequired by remember { mutableStateOf(false) }
 
     val isFormValid = name.isNotBlank() && host.isNotBlank() && port.isNotBlank()
+
+    if (showSoundsFolderRequired) {
+        AlertDialog(
+            onDismissRequest = { showSoundsFolderRequired = false },
+            title = { Text(stringResource(R.string.sounds_folder_required_title)) },
+            text = { Text(stringResource(R.string.sounds_folder_required_message)) },
+            confirmButton = {
+                AppButton(
+                    text = stringResource(R.string.choose_folder),
+                    onClick = {
+                        showSoundsFolderRequired = false
+                        showFolderSelector = true
+                    }
+                )
+            },
+            dismissButton = {
+                AppButton(
+                    text = stringResource(R.string.action_cancel),
+                    onClick = { showSoundsFolderRequired = false }
+                )
+            }
+        )
+    }
 
     if (showFolderSelector) {
         FolderSelectorDialog(
@@ -452,8 +476,12 @@ fun AddCharacterDialog(
             AppButton(
                 text = stringResource(R.string.action_save),
                 onClick = {
-                    val portInt = port.toIntOrNull() ?: 4000
-                    onSave(name, host, portInt, password, autoLogin && password.isNotBlank(), commands, useTTS, playSounds, soundsFolder)
+                    if (playSounds && soundsFolder.isBlank()) {
+                        showSoundsFolderRequired = true
+                    } else {
+                        val portInt = port.toIntOrNull() ?: 4000
+                        onSave(name, host, portInt, password, autoLogin && password.isNotBlank(), commands, useTTS, playSounds, soundsFolder)
+                    }
                 },
                 enabled = isFormValid
             )

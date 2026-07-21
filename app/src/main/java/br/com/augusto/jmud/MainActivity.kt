@@ -13,6 +13,7 @@ import br.com.augusto.jmud.ui.screens.AppNavigation
 import br.com.augusto.jmud.ui.theme.JMudTheme
 import br.com.augusto.jmud.ui.viewmodels.MudViewModel
 import br.com.augusto.jmud.util.SoundPackNotifier
+import br.com.augusto.jmud.util.StoragePermissions
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MudViewModel by viewModels()
@@ -42,13 +43,10 @@ class MainActivity : ComponentActivity() {
 
     private fun requestNeededPermissions() {
         val needed = mutableListOf<String>()
-        val audioPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.READ_MEDIA_AUDIO
-        } else {
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        }
-        if (checkSelfPermission(audioPermission) != PackageManager.PERMISSION_GRANTED) {
-            needed.add(audioPermission)
+        for (permission in StoragePermissions.required()) {
+            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                needed.add(permission)
+            }
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED

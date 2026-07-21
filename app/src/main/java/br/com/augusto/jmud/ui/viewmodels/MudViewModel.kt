@@ -10,12 +10,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.augusto.jmud.R
 import br.com.augusto.jmud.data.local.CharacterRepository
+import br.com.augusto.jmud.data.local.MacroRepository
 import br.com.augusto.jmud.data.local.SettingsRepository
 import br.com.augusto.jmud.data.local.TimerRepository
 import br.com.augusto.jmud.data.local.TriggerRepository
 import br.com.augusto.jmud.data.network.MudConnectionManager
 import br.com.augusto.jmud.data.network.MudEvent
 import br.com.augusto.jmud.domain.MudCharacter
+import br.com.augusto.jmud.domain.MudMacro
 import br.com.augusto.jmud.domain.MudTimer
 import br.com.augusto.jmud.domain.MudTrigger
 import br.com.augusto.jmud.domain.Scope
@@ -23,6 +25,7 @@ import br.com.augusto.jmud.util.AppStorage
 import br.com.augusto.jmud.util.BackupManager
 import br.com.augusto.jmud.util.ExtractResult
 import br.com.augusto.jmud.util.LogManager
+import br.com.augusto.jmud.util.MacroEngine
 import br.com.augusto.jmud.util.MspParser
 import br.com.augusto.jmud.util.MudAudioManager
 import br.com.augusto.jmud.util.SoundPackInstaller
@@ -48,11 +51,14 @@ import java.util.UUID
 
 enum class AppScreen { MAIN, GAME }
 
+enum class MacroRecordingState { NONE, RECORDING, PAUSED }
+
 class MudViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = CharacterRepository(application)
     private val timerRepository = TimerRepository(application)
     private val triggerRepository = TriggerRepository(application)
+    private val macroRepository = MacroRepository(application)
     private val settingsRepository = SettingsRepository(application)
     private val backupManager = BackupManager(application)
     private val updateManager = UpdateManager(application)
@@ -65,6 +71,9 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
     val characters = mutableStateListOf<MudCharacter>()
     val timers = mutableStateListOf<MudTimer>()
     val triggers = mutableStateListOf<MudTrigger>()
+    val macros = mutableStateListOf<MudMacro>()
+    var macroRecordingState = mutableStateOf(MacroRecordingState.NONE)
+    val recordedMacroCommands = mutableStateListOf<String>()
     val gameMessages = mutableStateListOf<String>()
     val namedHistories = mutableStateMapOf<String, SnapshotStateList<String>>()
     val announcements = MutableSharedFlow<String>(
@@ -121,6 +130,7 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         characters.addAll(repository.loadCharacters())
         timers.addAll(timerRepository.loadTimers())
         triggers.addAll(triggerRepository.loadTriggers())
+        macros.addAll(macroRepository.loadMacros())
 
         MudConnectionManager.setEncoding(encoding.value)
         if (ttsEngine.value.isNotBlank()) {
@@ -334,6 +344,83 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
             triggers.add(trigger)
         }
         triggerRepository.saveTriggers(triggers)
+    }
+
+    fun saveMacro(macro: MudMacro) {
+        val index = macros.indexOfFirst { it.id == macro.id }
+        if (index != -1) {
+            macros[index] = macro
+        } else {
+            macros.add(macro)
+        }
+        macroRepository.saveMacros(macros)
+    }
+
+    fun removeMacro(macro: MudMacro) {
+        macros.remove(macro)
+        macroRepository.saveMacros(macros)
+    }
+
+    fun startMacroRecording() {
+        recordedMacroCommands.clear()
+        macroRecordingState.value = MacroRecordingState.RECORDING
+        postStatusMessage(getString(R.string.macro_recording_started))
+    }
+
+    fun toggleMacroRecordingPause() {
+        when (macroRecordingState.value) {
+            MacroRecordingState.RECORDING -> {
+                macroRecordingState.value = MacroRecordingState.PAUSED
+                postStatusMessage(getString(R.string.macro_recording_paused))
+            }
+            MacroRecordingState.PAUSED -> {
+                macroRecordingState.value = MacroRecordingState.RECORDING
+                postStatusMessage(getString(R.string.macro_recording_resumed))
+            }
+            MacroRecordingState.NONE -> {}
+        }
+    }
+
+    fun ignoreLastRecordedMacroCommand() {
+        if (macroRecordingState.value == MacroRecordingState.NONE) return
+        if (recordedMacroCommands.isNotEmpty()) {
+            recordedMacroCommands.removeAt(recordedMacroCommands.size - 1)
+        } else {
+            postStatusMessage(getString(R.string.macro_recording_nothing_to_ignore))
+        }
+    }
+
+    fun stopMacroRecording(): Boolean {
+        val hadCommands = recordedMacroCommands.isNotEmpty()
+        macroRecordingState.value = MacroRecordingState.NONE
+        if (!hadCommands) {
+            postStatusMessage(getString(R.string.macro_recording_discarded_empty))
+        }
+        return hadCommands
+    }
+
+    fun discardMacroRecording() {
+        macroRecordingState.value = MacroRecordingState.NONE
+        recordedMacroCommands.clear()
+    }
+
+    fun saveMacroRecording(name: String, commands: String, scope: String, scopeValue: String) {
+        saveMacro(
+            MudMacro(
+                id = UUID.randomUUID().toString(),
+                name = name.trim(),
+                commands = commands,
+                scope = scope,
+                scopeValue = scopeValue,
+                enabled = true
+            )
+        )
+        recordedMacroCommands.clear()
+        postStatusMessage(getString(R.string.macro_recording_saved, name.trim()))
+    }
+
+    fun runMacro(macro: MudMacro) {
+        sendExpandedMacroCommands(MacroEngine.expandCommands(macro.commands, ""))
     }
 
     fun removeTrigger(trigger: MudTrigger) {
@@ -676,6 +763,8 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         timers.addAll(timerRepository.loadTimers())
         triggers.clear()
         triggers.addAll(triggerRepository.loadTriggers())
+        macros.clear()
+        macros.addAll(macroRepository.loadMacros())
 
         manualHost.value = repository.getManualHost()
         manualPort.value = repository.getManualPort()
@@ -897,6 +986,17 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         if (finalCommand.isNotBlank()) {
             userJustSentCommand.value = true
             flushNextTTS.value = true
+
+            if (macroRecordingState.value == MacroRecordingState.RECORDING) {
+                recordedMacroCommands.add(finalCommand)
+            }
+
+            val invocation = MacroEngine.parseInvocation(finalCommand)
+            if (invocation != null) {
+                executeMacro(invocation)
+                return
+            }
+
             val separator = commandSeparator.value
             val parts = if (separator.isNotEmpty()) {
                 finalCommand.split(separator).map { it.trim() }.filter { it.isNotEmpty() }
@@ -910,6 +1010,31 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
                 MudConnectionManager.sendMessage(parts.joinToString("\r\n"))
             } else {
                 transmit(finalCommand)
+            }
+        }
+    }
+
+    private fun executeMacro(invocation: MacroEngine.Invocation) {
+        val character = activeCharacter.value
+        val macro = macros.firstOrNull {
+            it.enabled &&
+                it.name.equals(invocation.name, ignoreCase = true) &&
+                (character == null || scopeMatches(it.scope, it.scopeValue, character))
+        }
+        if (macro == null) {
+            postStatusMessage(getString(R.string.macro_not_found, invocation.name))
+            return
+        }
+        sendExpandedMacroCommands(MacroEngine.expandCommands(macro.commands, invocation.argsString))
+    }
+
+    private fun sendExpandedMacroCommands(commands: List<String>) {
+        if (commands.isEmpty()) return
+        viewModelScope.launch {
+            for (cmd in commands) {
+                if (!isConnected.value) return@launch
+                transmit(cmd)
+                delay(300)
             }
         }
     }
