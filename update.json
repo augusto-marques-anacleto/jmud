@@ -1,6 +1,6 @@
 {
-  "versionCode": 8,
-  "versionName": "1.7",
-  "url": "https://github.com/augusto-marques-anacleto/jmud/releases/download/v1.7/jMud.apk",
-  "changelog": "Nova aba Macros: comandos manuais disparados com #nome, com argumentos anexados automaticamente ou controlados por $1, $2 e $0, e gravação de sequências de comandos direto da tela do jogo, com pausar, retomar, ignorar o último comando e copiar tudo para a área de transferência antes de salvar. Corrigida a permissão de armazenamento não solicitada em versões antigas do Android, que impedia gravar sons sem aviso. Impede salvar um personagem com sons ativados sem pasta selecionada, e passa a checar permissão e pasta de sons antes de baixar ou importar um pacote de sons."
+  "versionCode": 9,
+  "versionName": "1.8",
+  "url": "https://github.com/augusto-marques-anacleto/jmud/releases/download/v1.8/jMud.apk",
+  "changelog": "Sons cortados antes do fim, corrigidos: sons acima do limite do SoundPool, como os de 8 e 15 segundos, agora tocam inteiros. Interromper som para a música e os efeitos na hora, sem desligar o interruptor Sons, e música com repetições finitas para de repetir para sempre. Falha de conexão passa a aparecer no histórico com o motivo, sem internet, endereço não encontrado, servidor recusou ou não respondeu, com tempo limite de 20 segundos e estado da conexão na tela do jogo. Reconexão automática opcional por personagem, desligada por padrão, que não reconecta quando a saída foi pedida por você. Intervalo mínimo entre comandos, com padrão de 0,4 segundo, para servidores que aceitam poucos comandos por segundo, com intervalo próprio por macro, e Interromper macro. Nova aba Atalhos, com painel de botões no rodapé, ações personalizadas no campo de comando, criação automática dos atalhos de direção e modo inclinação para disparar atalhos movimentando o aparelho. Backup seletivo, escolhendo o que exportar e o que importar, e compartilhamento de um trigger, temporizador, macro, atalho ou personagem com outra pessoa. Escolha de onde ficam os arquivos do aplicativo, com opção de mover depois, e download de pacotes de sons que retoma de onde parou."
 }
