@@ -34,6 +34,7 @@ import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import br.com.augusto.jmud.R
 import br.com.augusto.jmud.domain.MudCharacter
@@ -43,6 +44,8 @@ import br.com.augusto.jmud.ui.components.AppButton
 import br.com.augusto.jmud.ui.components.AppTextField
 import br.com.augusto.jmud.ui.components.ScopeSelector
 import br.com.augusto.jmud.ui.viewmodels.MudViewModel
+import br.com.augusto.jmud.util.IntervalFormat
+import java.text.DecimalFormatSymbols
 import java.util.UUID
 
 @Composable
@@ -91,6 +94,7 @@ fun MacrosTab(viewModel: MudViewModel) {
                             macro = macro,
                             characters = viewModel.characters,
                             onEdit = { macroToEdit = macro },
+                            onShare = { viewModel.shareMacro(macro) },
                             onLongClick = { macroOptions = macro }
                         )
                     }
@@ -122,6 +126,14 @@ fun MacrosTab(viewModel: MudViewModel) {
                             modifier = Modifier.fillMaxWidth()
                         )
                         AppButton(
+                            text = stringResource(R.string.action_share),
+                            onClick = {
+                                viewModel.shareMacro(target)
+                                macroOptions = null
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        AppButton(
                             text = stringResource(R.string.action_remove),
                             onClick = {
                                 viewModel.removeMacro(target)
@@ -145,6 +157,7 @@ fun MacrosTab(viewModel: MudViewModel) {
             MacroDialog(
                 initialMacro = null,
                 characters = viewModel.characters,
+                defaultIntervalMs = viewModel.commandIntervalMs.value,
                 onDismiss = { showAddDialog = false },
                 onSave = { macro ->
                     viewModel.saveMacro(macro)
@@ -157,6 +170,7 @@ fun MacrosTab(viewModel: MudViewModel) {
             MacroDialog(
                 initialMacro = target,
                 characters = viewModel.characters,
+                defaultIntervalMs = viewModel.commandIntervalMs.value,
                 onDismiss = { macroToEdit = null },
                 onSave = { macro ->
                     viewModel.saveMacro(macro)
@@ -193,10 +207,19 @@ private fun macroDescription(macro: MudMacro, characters: List<MudCharacter>): S
         commandsText,
         macroScopeText(macro, characters)
     )
-    return if (macro.enabled) {
+    val decimalSeparator = remember { DecimalFormatSymbols.getInstance().decimalSeparator }
+    val withInterval = if (macro.intervalMs == IntervalFormat.INHERIT) {
         description
     } else {
-        description + stringResource(R.string.trigger_disabled_suffix)
+        description + stringResource(
+            R.string.macro_interval_suffix,
+            IntervalFormat.formatMillis(macro.intervalMs, decimalSeparator)
+        )
+    }
+    return if (macro.enabled) {
+        withInterval
+    } else {
+        withInterval + stringResource(R.string.trigger_disabled_suffix)
     }
 }
 
@@ -206,10 +229,12 @@ private fun MacroCard(
     macro: MudMacro,
     characters: List<MudCharacter>,
     onEdit: () -> Unit,
+    onShare: () -> Unit,
     onLongClick: () -> Unit
 ) {
     val editLabel = stringResource(R.string.edit_item, macro.name)
     val runLabel = stringResource(R.string.action_run)
+    val shareLabel = stringResource(R.string.share_item, macro.name)
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -217,6 +242,7 @@ private fun MacroCard(
                 role = Role.Button
                 customActions = listOf(
                     CustomAccessibilityAction(editLabel) { onEdit(); true },
+                    CustomAccessibilityAction(shareLabel) { onShare(); true },
                     CustomAccessibilityAction(runLabel) { onLongClick(); true }
                 )
             }
@@ -237,6 +263,7 @@ private fun MacroCard(
 private fun MacroDialog(
     initialMacro: MudMacro?,
     characters: List<MudCharacter>,
+    defaultIntervalMs: Int,
     onDismiss: () -> Unit,
     onSave: (MudMacro) -> Unit
 ) {
@@ -245,12 +272,25 @@ private fun MacroDialog(
     var scope by remember { mutableStateOf(initialMacro?.scope ?: Scope.ALL) }
     var scopeValue by remember { mutableStateOf(initialMacro?.scopeValue ?: "") }
     var enabled by remember { mutableStateOf(initialMacro?.enabled ?: true) }
+    val decimalSeparator = remember { DecimalFormatSymbols.getInstance().decimalSeparator }
+    var intervalText by remember {
+        mutableStateOf(
+            if (initialMacro == null || initialMacro.intervalMs == IntervalFormat.INHERIT) {
+                ""
+            } else {
+                IntervalFormat.formatMillis(initialMacro.intervalMs, decimalSeparator)
+            }
+        )
+    }
 
+    val parsedInterval = IntervalFormat.parseToMillis(intervalText)
+    val intervalValid = intervalText.isBlank() || parsedInterval != null
     val scopeValueValid = when (scope) {
         Scope.ALL -> true
         else -> scopeValue.isNotBlank()
     }
-    val isFormValid = name.isNotBlank() && commands.isNotBlank() && scopeValueValid
+    val nameValid = name.isBlank() || name.trim().none { it.isWhitespace() }
+    val isFormValid = name.isNotBlank() && nameValid && commands.isNotBlank() && scopeValueValid && intervalValid
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -282,6 +322,35 @@ private fun MacroDialog(
                     minLines = 3,
                     maxLines = 5
                 )
+                Text(
+                    text = stringResource(
+                        R.string.macro_interval_hint,
+                        IntervalFormat.formatMillis(defaultIntervalMs, decimalSeparator)
+                    ),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                AppTextField(
+                    value = intervalText,
+                    onValueChange = { intervalText = it },
+                    label = stringResource(R.string.field_macro_interval),
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Next
+                    )
+                )
+                if (!intervalValid) {
+                    Text(
+                        text = stringResource(R.string.command_interval_invalid),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+                if (!nameValid) {
+                    Text(
+                        text = stringResource(R.string.macro_name_no_spaces),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
                 ScopeSelector(
                     scope = scope,
                     scopeValue = scopeValue,
@@ -309,7 +378,12 @@ private fun MacroDialog(
                             commands = commands,
                             scope = scope,
                             scopeValue = scopeValue,
-                            enabled = enabled
+                            enabled = enabled,
+                            intervalMs = if (intervalText.isBlank()) {
+                                IntervalFormat.INHERIT
+                            } else {
+                                parsedInterval ?: IntervalFormat.INHERIT
+                            }
                         )
                     )
                 },

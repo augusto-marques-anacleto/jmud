@@ -3,12 +3,14 @@ package br.com.augusto.jmud
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.core.content.IntentCompat
 import br.com.augusto.jmud.ui.screens.AppNavigation
 import br.com.augusto.jmud.ui.theme.JMudTheme
 import br.com.augusto.jmud.ui.viewmodels.MudViewModel
@@ -22,12 +24,24 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         requestNeededPermissions()
-        handleIntent(intent)
+        if (savedInstanceState == null) {
+            handleIntent(intent)
+        }
         setContent {
             JMudTheme {
                 AppNavigation(viewModel)
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.onAppForegrounded()
+    }
+
+    override fun onStop() {
+        viewModel.onAppBackgrounded()
+        super.onStop()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -36,9 +50,34 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        if (intent?.getBooleanExtra(SoundPackNotifier.EXTRA_SHOW_PROGRESS, false) == true) {
+        if (intent == null) return
+
+        if (intent.getBooleanExtra(SoundPackNotifier.EXTRA_SHOW_PROGRESS, false)) {
             viewModel.showSoundPackDialog()
         }
+
+        when (intent.action) {
+            Intent.ACTION_VIEW -> {
+                val uri = intent.data
+                if (uri != null) {
+                    viewModel.openImportFromUri(uri)
+                    consumeIntent()
+                }
+            }
+            Intent.ACTION_SEND -> {
+                val uri = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
+                if (uri != null) {
+                    viewModel.openImportFromUri(uri)
+                } else {
+                    viewModel.openImportFromText(intent.getStringExtra(Intent.EXTRA_TEXT))
+                }
+                consumeIntent()
+            }
+        }
+    }
+
+    private fun consumeIntent() {
+        setIntent(Intent(Intent.ACTION_MAIN))
     }
 
     private fun requestNeededPermissions() {

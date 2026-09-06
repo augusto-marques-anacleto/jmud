@@ -86,16 +86,160 @@
     <string name="use_system_rate_pitch">Use system rate and pitch</string>
     <string name="test_voice">Test voice</string>
     <string name="test_voice_message">This is the configured voice of %1$s.</string>
+    <string name="settings_storage">Storage</string>
+    <string name="storage_settings_description">This is where the app folders live: sound packs, the sound folder of each character and the session logs.</string>
+    <string name="storage_choice_title">Where should jMud keep its files?</string>
+    <string name="storage_choice_description">Choose where the app will create the folder with sounds and logs. You can change it later in Settings, in the Storage section, and the files are moved along.</string>
+    <string name="storage_choice_later">Decide later</string>
+    <string name="storage_documents">Documents on internal storage</string>
+    <string name="storage_app_internal">App folder on internal storage</string>
+    <string name="storage_removable">Memory card</string>
+    <string name="storage_documents_description">Documents on internal storage: the folder shows up in any file manager and stays on the device even if you uninstall the app, which makes it easy to copy sounds from a computer.</string>
+    <string name="storage_app_internal_description">App folder on internal storage: the most reliable option, because it never depends on storage permission, but the files are deleted along with the app if you uninstall it.</string>
+    <string name="storage_removable_description">Memory card: good for large sound packs, since it does not take up device memory. If the card is removed, the app falls back to internal storage until you put it back.</string>
+    <string name="storage_option_button">%1$s, %2$s</string>
+    <string name="storage_free_space">%1$s free</string>
+    <string name="storage_free_unknown">unknown space</string>
+    <string name="storage_current_value">Current location: %1$s. Folder: %2$s</string>
+    <string name="storage_selected">jMud files will now be kept in %1$s. Folder: %2$s</string>
+    <string name="storage_not_writable">Could not write to that location. Choose another storage.</string>
+    <string name="storage_same_location">That is already the current location of the files.</string>
+    <string name="storage_no_other_option">There is no other storage available on this device. If you have a memory card, insert it and open this screen again.</string>
+    <string name="storage_move_button">Move files to another storage</string>
+    <string name="storage_move_title">Move files</string>
+    <string name="storage_move_description">Choose the new location. Everything in the current folder, including sound packs and logs, is copied there and then deleted from the old place.</string>
+    <string name="storage_move_confirm">Move every jMud file to %1$s, in folder %2$s? This can take a few minutes if you have many sounds.</string>
+    <string name="storage_move_confirm_button">Yes, move</string>
+    <string name="storage_moving_title">Moving files</string>
+    <string name="storage_moving_preparing">Preparing the file list...</string>
+    <string name="storage_moving_progress">Copying file %1$d of %2$d. %3$d percent.</string>
+    <string name="storage_move_ok">Files moved to %1$s. Folder: %2$s</string>
+    <string name="storage_move_ok_leftovers">Files copied to %1$s, but the old folder at %2$s could not be fully deleted. You can remove it with a file manager.</string>
+    <string name="storage_move_cancelled">Migration cancelled. Nothing was deleted from the current location.</string>
+    <string name="storage_move_no_space">There is not enough space at the destination to move the files.</string>
+    <string name="storage_move_failed">The files could not be moved. Nothing was deleted from the current location.</string>
+
     <string name="settings_backup">Backup</string>
-    <string name="backup_description">The backup includes characters, triggers, timers and settings.</string>
+    <string name="tilt_section_title">Tilt mode</string>
+    <string name="tilt_description">Instead of tapping buttons, you can tilt the device to fire a shortcut. Turn the mode on while holding the device the way you usually hold it: that becomes the resting position. Tilting to one side announces the shortcut of that direction and, if you hold the tilt for a moment, it is sent with a confirmation beep. Returning to the resting position arms the next move.</string>
+    <string name="tilt_mode_switch">Tilt mode active</string>
+    <string name="tilt_configure">Configure tilt</string>
+    <string name="tilt_mapping_description">Choose which of your shortcuts each tilt fires.</string>
+    <string name="tilt_zone_forward">Tilt forward</string>
+    <string name="tilt_zone_backward">Tilt backward</string>
+    <string name="tilt_zone_right">Tilt right</string>
+    <string name="tilt_zone_left">Tilt left</string>
+    <string name="tilt_zone_neutral">Resting position</string>
+    <string name="tilt_zone_value">%1$s: %2$s</string>
+    <string name="tilt_zone_none">no shortcut</string>
+    <string name="tilt_zone_unmapped">no shortcut in this direction</string>
+    <string name="tilt_select_shortcut_title">Shortcut for: %1$s</string>
+    <string name="tilt_suggest_mapping">Fill in with the direction shortcuts</string>
+    <string name="tilt_mapping_suggested">Mapping filled in with the direction shortcuts.</string>
+    <string name="tilt_mapping_nothing_to_suggest">No direction shortcuts found to fill in, or the directions are already mapped.</string>
+    <string name="tilt_repeat_switch">Repeat while held tilted</string>
+    <string name="tilt_repeat_description">With this on, holding the tilt repeats the command at the pace of the interval between commands from settings, which is what you want to walk or run several steps in a row. Level the device to stop. With it off, each step needs a tilt and a return.</string>
+    <string name="tilt_sensitivity_title">How far to tilt</string>
+    <string name="tilt_sensitivity_value">How far to tilt: %1$d degrees</string>
+    <string name="tilt_sensitivity_option">%1$d degrees</string>
+    <string name="tilt_confirm_title">Time to confirm</string>
+    <string name="tilt_confirm_value">Time to confirm: %1$s seconds</string>
+    <string name="tilt_confirm_option">%1$s seconds</string>
+    <string name="tilt_recalibrate">Recalibrate resting position</string>
+    <string name="tilt_recalibrated">Resting position recalibrated.</string>
+    <string name="tilt_mode_on">Tilt mode on. Hold the device still for a moment in the resting position.</string>
+    <string name="tilt_mode_off">Tilt mode off.</string>
+    <string name="tilt_sensor_missing">This device has no compatible motion sensor, so tilt mode is not available.</string>
+
+    <string name="tab_shortcuts">Shortcuts</string>
+    <string name="add_shortcut">Add shortcut</string>
+    <string name="edit_shortcut_title">Edit shortcut</string>
+    <string name="no_shortcuts_saved">No shortcuts created yet. Use Add shortcut to create your own, or Add directions to create the movement shortcuts all at once.</string>
+    <string name="add_direction_shortcuts">Add directions</string>
+    <string name="shortcuts_description">Shortcuts are buttons with a label and an action. Turn the shortcut panel on to keep them at the bottom of the game screen, where you find each one by dragging your finger, and use your screen reader actions on the command field to reach them without looking at the screen.</string>
+    <string name="shortcut_panel_switch">Shortcut panel on the game screen</string>
+    <string name="field_shortcut_label">Shortcut name</string>
+    <string name="field_shortcut_command">Command to send</string>
+    <string name="shortcut_action_title">What the shortcut does</string>
+    <string name="shortcut_action_value">Action: %1$s</string>
+    <string name="shortcut_action_command">Send a command</string>
+    <string name="shortcut_action_repeat_last">Repeat the last command</string>
+    <string name="shortcut_action_speak_last">Repeat the last received line</string>
+    <string name="shortcut_action_stop_sound">Stop sound</string>
+    <string name="shortcut_action_stop_macro">Stop macro</string>
+    <string name="shortcut_sends_command">sends %1$s</string>
+    <string name="shortcut_description">Shortcut %1$s, %2$s. %3$s</string>
+    <string name="shortcut_not_connected">You are not connected, so the command was not sent.</string>
+    <string name="shortcut_nothing_to_repeat">There is no previous command to repeat.</string>
+    <string name="shortcut_no_last_line">There is no line in the history yet.</string>
+    <string name="share_subject_shortcut">jMud shortcut: %1$s</string>
+    <string name="direction_shortcuts_already_there">The direction shortcuts are already created.</string>
+    <plurals name="direction_shortcuts_added">
+        <item quantity="one">%d direction shortcut created.</item>
+        <item quantity="other">%d direction shortcuts created.</item>
+    </plurals>
+    <plurals name="imported_shortcuts">
+        <item quantity="one">%d shortcut</item>
+        <item quantity="other">%d shortcuts</item>
+    </plurals>
+    <string name="section_shortcuts">Shortcuts</string>
+    <string name="help_shortcuts_title">Shortcuts</string>
+    <string name="help_shortcuts_body">A shortcut is a button with a name and an action, created by you on the Shortcuts tab. The action can be sending a command to the game, such as north or drink cure, or an action of the app itself: repeat the last command, repeat the last received line, stop the sound or stop the running macro.\n\nThe Add directions button creates the movement shortcuts all at once, already in compass order: northwest, north and northeast on the first row, west, look and east on the second, southwest, south and southeast on the third, and up and down at the end. It is the fastest way to start without typing anything.\n\nShortcuts show up in two ways. The first is the shortcut panel, a grid of buttons at the bottom of the game screen, which you turn on with the switch on this tab or in More options. It was designed for touch exploration: rest your finger on the screen and drag, and the screen reader speaks the name of each button without activating anything. Since the positions never move, your hand soon remembers where each direction is and you go straight to it, with no need to swipe item by item. To send it, lift your finger and double tap, or turn on the lift-to-activate option in your screen reader, so releasing on the button is enough.\n\nThe second way takes no screen space at all: shortcuts are also available as custom actions of the command field. With the focus on the field where you type, open your screen reader actions and the shortcuts will be there, ready to pick. That way you can leave the panel off and still use the shortcuts, including through a gesture you assign in your reader to open custom actions.\n\nEvery shortcut has a scope, like triggers and macros: all games, one server or one character. Only the shortcuts of the character you are playing show up in the panel. And, like everything else, a shortcut can be shared: press and hold it in the list and choose Share to send it to someone else.\n\nBesides the panel and the screen reader actions, there is a third way to fire a shortcut: tilt mode, on the same tab. It uses the device motion sensor, which does not go through the screen reader and therefore competes with no gesture of it.\n\nYou turn the mode on holding the device the way you usually hold it, and that position becomes the resting one, whether you are sitting, lying down or on a bus. From there, tilting forward, backward, right or left fires the shortcut you mapped to that direction. On entering a direction the app speaks the shortcut name without sending anything; if you hold the tilt for the confirmation time, it sends and plays a short beep. Tilted by accident? Return to the resting position before the time is up and nothing happens.\n\nUnder Configure tilt you choose which shortcut each direction fires, how many degrees are needed to leave the resting position and how long to hold until it confirms. If you created the shortcuts with the Add directions button, the Fill in with the direction shortcuts button maps north, south, east and west at once. Directions are not mandatory: any shortcut of yours can be mapped, including the ones that stop the sound or repeat the last line.\n\nThe mode always starts off and turns itself off when you leave the game, so a device in your pocket never starts sending commands. Devices without a compatible motion sensor do not show this section.</string>
+
+    <string name="action_share">Share</string>
+    <string name="share_item">Share %1$s</string>
+    <string name="share_chooser_title">Share with</string>
+    <string name="share_subject_character">jMud character: %1$s</string>
+    <string name="share_subject_trigger">jMud trigger: %1$s</string>
+    <string name="share_subject_timer">jMud timer: %1$s</string>
+    <string name="share_subject_macro">jMud macro: %1$s</string>
+    <string name="share_timer_label">%1$d second timer</string>
+    <string name="share_description">%1$s. Open the attached file with the jMud app to import it.</string>
+    <string name="share_failed">The share could not be prepared.</string>
+    <string name="import_open_with_label">Import into jMud</string>
+    <string name="import_title">Import into jMud</string>
+    <string name="import_confirm">Import</string>
+    <string name="import_content_description">Choose what to import from this file.</string>
+    <string name="import_invalid_file">This file is not a jMud backup or item.</string>
+    <string name="import_nothing_selected">Nothing was selected to import.</string>
+    <string name="import_summary">Imported: %1$s.</string>
+    <string name="imported_settings">the app settings</string>
+    <string name="import_mode_replace">Replace what already exists</string>
+    <string name="import_mode_replace_description">Each selected type will be replaced by the file contents, and what you have today of those types will be erased.</string>
+    <string name="import_mode_add_description">The items in the file will be added to what you already have, without erasing anything. A macro with a repeated name gets a number at the end.</string>
+    <string name="import_scope_description">Items arrive with the scope of whoever created them. You can keep that scope or set a new one for every imported item.</string>
+    <string name="import_scope_override">Set a new scope</string>
+    <string name="export_nothing_selected">Nothing was selected to export.</string>
+    <string name="export_selection_title">What to export</string>
+    <string name="export_selection_description">Select what should go into the file. To send a single item to someone, use the Share action on the item itself in the list. Note: characters exported here carry their saved passwords, while a character sent through the Share action goes without one.</string>
+    <string name="section_characters">Characters</string>
+    <string name="section_triggers">Triggers</string>
+    <string name="section_timers">Timers</string>
+    <string name="section_macros">Macros</string>
+    <string name="section_settings">App settings</string>
+    <string name="section_with_count">%1$s: %2$d</string>
+    <plurals name="imported_characters">
+        <item quantity="one">%d character</item>
+        <item quantity="other">%d characters</item>
+    </plurals>
+    <plurals name="imported_triggers">
+        <item quantity="one">%d trigger</item>
+        <item quantity="other">%d triggers</item>
+    </plurals>
+    <plurals name="imported_timers">
+        <item quantity="one">%d timer</item>
+        <item quantity="other">%d timers</item>
+    </plurals>
+    <plurals name="imported_macros">
+        <item quantity="one">%d macro</item>
+        <item quantity="other">%d macros</item>
+    </plurals>
+
+    <string name="backup_description">A backup can include everything or just part of it: characters, triggers, timers, macros and app settings. When importing you also choose what to take from the file.</string>
     <string name="backup_export">Export backup</string>
     <string name="backup_import">Import backup</string>
-    <string name="backup_import_warning">Importing a backup will replace your current characters, triggers, timers and settings. Do you want to continue?</string>
-    <string name="backup_import_confirm">Yes, choose file</string>
     <string name="backup_export_ok">Backup exported successfully.</string>
     <string name="backup_export_failed">The backup could not be exported.</string>
-    <string name="backup_import_ok">Backup imported successfully.</string>
-    <string name="backup_import_failed">The backup could not be imported. Make sure the file is a valid jMud backup.</string>
     <string name="settings_updates">Updates</string>
     <string name="installed_version">Installed version: %1$s</string>
     <string name="check_updates">Check for updates</string>
@@ -225,7 +369,7 @@
     <string name="macro_recording_saved">Macro \"%1$s\" saved.</string>
     <string name="macro_not_found">Macro command \"%1$s\" not found.</string>
     <string name="help_macros_title">Macros</string>
-    <string name="help_macros_body">Macros are command shortcuts you create. There are two ways to create one.\n\nManual command: on the Macros tab, set a name and a list of commands, one per line. To run it, type # followed by the name during the game, for example #tapa. If you type anything else after the name, that text is automatically appended to the end of the last command. For example, a macro named \"tt\" with the command \"lan telep\", run as #tt zanand, sends \"lan telep zanand\", with nothing special to write in the command.\n\nFor more control, this is optional: using $1, $2 and so on inside the commands, each one receives a word typed after the name, and $0 receives the whole typed text at once, which lets you place the typed text in the middle of a command or repeat it across more than one line. Once the commands already use $1, $2 or $0, the text is no longer appended automatically; it only goes where you placed it.\n\nRecording: through the More options button on the game screen, under Record macro, you record a sequence of commands while playing, useful for mapping an area. Start recording begins capturing every command you send and takes you straight back to the game screen, ready to type. Pause recording stops capturing without losing what was already recorded, and the same button turns into Resume recording to continue later. Ignore last command removes the most recent recorded command, one at a time; once there is nothing left to remove, the app lets you know. Stop recording ends the capture: if any command was recorded, a screen opens to name and save the macro, with the option to copy all commands to the clipboard before saving.\n\nLike triggers and timers, each macro has a scope: all games, one server or a specific character. A disabled macro does not respond when its name is typed.</string>
+    <string name="help_macros_body">Macros are command shortcuts you create. There are two ways to create one.\n\nManual command: on the Macros tab, set a name and a list of commands, one per line. To run it, type # followed by the name during the game, for example #tapa. If you type anything else after the name, that text is automatically appended to the end of the last command. For example, a macro named \"tt\" with the command \"lan telep\", run as #tt zanand, sends \"lan telep zanand\", with nothing special to write in the command.\n\nFor more control, this is optional: using $1, $2 and so on inside the commands, each one receives a word typed after the name, and $0 receives the whole typed text at once, which lets you place the typed text in the middle of a command or repeat it across more than one line. Once the commands already use $1, $2 or $0, the text is no longer appended automatically; it only goes where you placed it.\n\nRecording: through the More options button on the game screen, under Record macro, you record a sequence of commands while playing, useful for mapping an area. Start recording begins capturing every command you send and takes you straight back to the game screen, ready to type. Pause recording stops capturing without losing what was already recorded, and the same button turns into Resume recording to continue later. Ignore last command removes the most recent recorded command, one at a time; once there is nothing left to remove, the app lets you know. Stop recording ends the capture: if any command was recorded, a screen opens to name and save the macro, with the option to copy all commands to the clipboard before saving.\n\nLike triggers and timers, each macro has a scope: all games, one server or a specific character. A disabled macro does not respond when its name is typed.\n\nA macro sends its commands one by one, honouring the interval between commands. By default it uses the interval set in Settings, in the Commands section, and each macro may have its own, typed in seconds in the form, with decimals if needed, such as 0.4. Leave that field empty to follow the default. The interval exists because many servers accept few commands per second, IntMUD about three, and silently drop the excess: without spacing, a long walking macro would lose steps along the way.\n\nMacros can be shared: press and hold the macro in the list and choose Share to send that shortcut to someone else.</string>
 
     <string name="open_link_title">Open link</string>
     <string name="open_link_question">Do you want to open this link in the browser?</string>
@@ -259,8 +403,43 @@
     <string name="sound_pack_permission_required_title">Permission required</string>
     <string name="sound_pack_permission_required_message">Storage permission is required to download or import sound packs. Grant the permission and try again.</string>
 
+    <string name="stop_macro_button">Stop macro</string>
+    <string name="stop_sound_button">Stop sound</string>
+    <string name="macro_interrupted">Macro stopped. Commands that had not been sent yet were discarded.</string>
+    <string name="macro_nothing_running">No macro running.</string>
+    <string name="sounds_interrupted">Sound stopped.</string>
+
+    <string name="command_interval_description">Minimum interval between commands sent in sequence: macros, command separator, trigger commands, timers and post-connection commands. Many servers limit how many commands they accept per second and silently drop the excess; on IntMUD the limit is around three commands per second. Accepts decimal numbers, for example 0.4. Use 0 to send with no interval.</string>
+    <string name="command_interval_label">Interval between commands, in seconds</string>
+    <string name="command_interval_invalid">Invalid value. Type the seconds as a number, for example 0.4.</string>
+    <string name="macro_name_no_spaces">The macro name cannot contain spaces, because only the first word after the hash is used to call it. Use a single word, such as north_route.</string>
+    <string name="field_macro_interval">Interval between this macro\'s commands, in seconds</string>
+    <string name="macro_interval_hint">Leave it empty to use the default interval from settings, currently %1$s seconds.</string>
+    <string name="macro_interval_suffix"> Own interval of %1$s seconds between commands.</string>
+
+    <string name="auto_reconnect_switch">Reconnect automatically</string>
+    <string name="reconnect_scheduled">Reconnecting in %1$d seconds. Attempt %2$d of %3$d.</string>
+    <string name="reconnect_trying">Reconnecting. Attempt %1$d of %2$d.</string>
+    <string name="reconnected">Reconnected.</string>
+    <string name="reconnect_gave_up">Could not reconnect after %1$d attempts. Use Reconnect whenever you want to try again.</string>
+    <string name="notifications_denied_warning">Warning: notification permission is denied. The system may end the connection when you leave the game screen. Allow jMud notifications in the Android settings.</string>
+
     <string name="connecting_to">Connecting to %1$s:%2$d...</string>
-    <string name="connection_error">Connection error: %1$s</string>
+    <string name="connection_failed_reason">Could not connect. Reason: %1$s</string>
+    <string name="connection_reason_no_internet">the device has no internet connection.</string>
+    <string name="connection_reason_host_not_found">the server address was not found. Check the address you typed and your internet.</string>
+    <string name="connection_reason_server_unavailable">the server refused the connection. It may be down.</string>
+    <string name="connection_reason_timeout">the server did not answer in time. It may be down or your internet is unstable.</string>
+    <string name="connection_reason_unknown">unidentified connection failure.</string>
+    <string name="connection_reason_detail">%1$s Technical detail: %2$s</string>
+    <string name="connection_status_label">Connection status: %1$s</string>
+    <string name="connection_status_connecting">connecting</string>
+    <string name="connection_status_connected">connected</string>
+    <string name="connection_status_failed">connection failed</string>
+    <string name="connection_status_disconnected">disconnected</string>
+    <string name="quit_commands_label">Commands that end the session, separated by commas</string>
+    <string name="session_ended_by_you">Session ended by you.</string>
+    <string name="connection_lost">Warning: Connection lost.</string>
     <string name="server_closed_connection">Warning: Connection closed by the server.</string>
     <string name="send_failed">Warning: The command could not be sent.</string>
 
@@ -313,23 +492,27 @@
     <string name="help_overview_title">Overview</string>
     <string name="help_overview_body">jMud is a MUD client built to be fully accessible with screen readers. MUDs are multiplayer text games played over the internet: the server sends descriptions and events as text, and you play by typing commands.\n\nThe home screen has four tabs at the bottom: Characters, to save your games and connect; Triggers, to react automatically to game messages; Timers, to repeat commands at intervals; and Settings, to adjust speech, sounds, logs and backup.\n\nWhile playing, the same tabs appear at the top of the screen, so you can create triggers, timers and change settings without disconnecting.\n\nUse the Previous and Next buttons to move through this help. You can reopen it at any time in Settings, in the About this app section.</string>
     <string name="help_characters_title">Characters and connection</string>
-    <string name="help_characters_body">On the Characters tab you save the games you play most. Tap Add and enter the character name, the server address, the port and, if you want, the password.\n\nWith automatic login enabled, jMud sends the name and password as soon as the connection is established, and you enter the game without typing anything. In the post-connection commands field you can list commands, one per line, to be sent right after login.\n\nEach character also stores its own speech and sound preferences, plus the sounds folder used by that game. With the Choose Folder button you select an existing folder or create a new one, and the app suggests a name based on the server address. Where the folders live and how to manage them is explained in detail on the Sounds and sound packs page of this help.\n\nTo connect, just tap the character in the list. A long press opens the edit and remove options; these actions are also available in the screen reader actions menu.\n\nThe Manual Connection button lets you connect to any server by entering just the address and port, without saving a character.</string>
+    <string name="help_characters_body">On the Characters tab you save the games you play most. Tap Add and enter the character name, the server address, the port and, if you want, the password.\n\nWith automatic login enabled, jMud sends the name and password as soon as the connection is established, and you enter the game without typing anything. In the post-connection commands field you can list commands, one per line, to be sent right after login.\n\nEach character also stores its own speech and sound preferences, plus the sounds folder used by that game. With the Choose Folder button you select an existing folder or create a new one, and the app suggests a name based on the server address. Where the folders live and how to manage them is explained in detail on the Sounds and sound packs page of this help.\n\nTo connect, just tap the character in the list. A long press opens the edit and remove options; these actions are also available in the screen reader actions menu.\n\nThe Manual Connection button lets you connect to any server by entering just the address and port, without saving a character.
+
+Each character has a Reconnect automatically option, off by default. With it on, if the connection of that character drops on its own, from a signal loss or because the system ended it while the app was in the background, jMud tries to reconnect up to five times, waiting 5, 10, 20, 30 and 60 seconds between attempts, announcing each step. The session history is kept and the automatic login runs again. When you disconnect or leave the game yourself, it does not try anything.
+
+To tell apart you leaving from the game dropping the connection, the app looks at the last command sent. In Settings, in the Commands section, there is the list of commands that end the session, which comes with fim, sair, quit, exit and logout. If you sent one of them shortly before the connection dropped, jMud understands the exit was yours and does not reconnect. If the MUD dropped you for being idle, or the signal died, it reconnects. If your game uses another word to leave, add it to that list.</string>
     <string name="help_game_title">Game screen</string>
-    <string name="help_game_body">The game screen shows the message history, the command field and the Send button.\n\nAt the top there are two switches: Speech, which controls whether incoming messages are spoken, and Sounds, which controls sound effects. The More options button gathers other actions: enabling or disabling triggers and timers, downloading or importing sound packs, and disconnecting.\n\nIn the history, you can read the messages line by line with your screen reader. The Scroll to end button jumps to the most recent messages, and Clear history clears the screen.\n\nType in the command field and tap Send. With the field empty, Send repeats the last command, which is handy for walking or repeating actions.\n\nIf you use a physical keyboard, the Playing with the keyboard page of this help explains the available shortcuts.\n\nA long press on the Send button opens the named histories, separate lists that triggers can feed, such as a chat channel or combat records. When a message contains a link, you can open it by tapping the line.</string>
+    <string name="help_game_body">The game screen shows the message history, the command field and the Send button.\n\nAt the top there are two switches: Speech, which controls whether incoming messages are spoken, and Sounds, which controls sound effects. The More options button gathers other actions: stopping the running macro, stopping the sound that is playing, enabling or disabling triggers and timers, downloading or importing sound packs, recording a macro, and disconnecting.\n\nStop sound immediately halts the music and effects playing at that moment without switching the Sounds toggle off: later sounds keep working normally. Stop macro discards the commands of a sequence that have not been sent yet, handy when a long macro started by mistake or took you to the wrong place.\n\nIn the history, you can read the messages line by line with your screen reader. The Scroll to end button jumps to the most recent messages, and Clear history clears the screen.\n\nType in the command field and tap Send. With the field empty, Send repeats the last command, which is handy for walking or repeating actions.\n\nIf you use a physical keyboard, the Playing with the keyboard page of this help explains the available shortcuts.\n\nA long press on the Send button opens the named histories, separate lists that triggers can feed, such as a chat channel or combat records. When a message contains a link, you can open it by tapping the line.\n\nIf the shortcut panel is on, it sits at the bottom, below the command field, with one button for each of your shortcuts. The Shortcuts page of this help explains how to use it.</string>
     <string name="help_keyboard_title">Playing with the keyboard</string>
     <string name="help_keyboard_body">If you connect a physical keyboard to your device, jMud offers shortcuts to play quickly.\n\nWith focus on the command field: the Enter key sends what is written and, with the field empty, sends the last command again, which makes it easy to repeat actions and walk around the game. The Page Up and Page Down keys read the history line by line without taking focus away from the field: the review starts at the most recent message, Page Up goes back to earlier lines and Page Down moves forward to newer ones. Each line is announced by the screen reader. When you send a command, the review returns to the end of the history.\n\nWith focus on the history list: the up and down arrows read line by line, Page Up and Page Down jump ten lines at a time, Home goes to the first message, End goes to the last one and Escape returns focus to the command field.\n\nNote: keyboard usage in the app may vary depending on the keyboard and the screen reader in use, which can behave differently from each other.</string>
     <string name="help_multi_commands_title">Several commands at once</string>
-    <string name="help_multi_commands_body">You can send several commands at once by separating them with space, at sign, space. For example: say good morning! @ say how are you? sends both commands in sequence, in the order they were written.\n\nThe at sign was chosen because it is easy to reach on a phone keyboard, but the separator is yours: in Settings, in the Commands section, you can change it to a semicolon or any other text, or leave the field empty to disable the feature.\n\nBecause the default separator includes the surrounding spaces, an at sign attached to another word, as in an e-mail address, does not split anything.</string>
+    <string name="help_multi_commands_body">You can send several commands at once by separating them with space, at sign, space. For example: say good morning! @ say how are you? sends both commands in sequence, in the order they were written.\n\nThe at sign was chosen because it is easy to reach on a phone keyboard, but the separator is yours: in Settings, in the Commands section, you can change it to a semicolon or any other text, or leave the field empty to disable the feature.\n\nBecause the default separator includes the surrounding spaces, an at sign attached to another word, as in an e-mail address, does not split anything.\n\nSeparated commands are not fired all at once: the app honours the interval between commands set in Settings, in the Commands section. Many servers accept a limited number of commands per second and silently drop whatever goes beyond that.</string>
     <string name="help_triggers_title">Triggers</string>
-    <string name="help_triggers_body">Triggers are automatic reactions to game messages. When an incoming line matches the configured text, jMud can send commands in response, play a sound from your sounds folder, store the line in a named history, or ignore the line, silencing and hiding repetitive messages.\n\nEach trigger has a scope: it can apply to all games, to a specific server or to a single character. You can also disable a trigger without deleting it, or disable all of them at once through the More options button on the game screen.\n\nThe match types include starts with, contains, ends with, exact message and pattern with variables, which lets you capture parts of the message and use them in the response commands.\n\nThe Triggers tab has its own Help button with a detailed explanation of each type, the patterns and the variables, with several ready-made examples.</string>
+    <string name="help_triggers_body">Triggers are automatic reactions to game messages. When an incoming line matches the configured text, jMud can send commands in response, play a sound from your sounds folder, store the line in a named history, or ignore the line, silencing and hiding repetitive messages.\n\nEach trigger has a scope: it can apply to all games, to a specific server or to a single character. You can also disable a trigger without deleting it, or disable all of them at once through the More options button on the game screen.\n\nThe match types include starts with, contains, ends with, exact message and pattern with variables, which lets you capture parts of the message and use them in the response commands.\n\nThe Triggers tab has its own Help button with a detailed explanation of each type, the patterns and the variables, with several ready-made examples.\n\nTo send a ready-made trigger to someone else, press and hold the trigger in the list and choose Share. Whoever receives it imports it in a few taps, with no need to build the trigger by hand.</string>
     <string name="help_timers_title">Timers</string>
-    <string name="help_timers_body">Timers send commands automatically at intervals while you are connected. When creating one, you set the interval in seconds and the commands, one per line.\n\nThey are useful to keep the connection alive in games that disconnect idle players, to repeat training actions, or for any routine that needs to happen regularly.\n\nLike triggers, each timer has a scope: all games, one server or a specific character. You can disable a timer individually by editing it, or disable all of them through the More options button on the game screen.\n\nTimers only run while the connection is open; when you disconnect, they all stop automatically.</string>
+    <string name="help_timers_body">Timers send commands automatically at intervals while you are connected. When creating one, you set the interval in seconds and the commands, one per line.\n\nThey are useful to keep the connection alive in games that disconnect idle players, to repeat training actions, or for any routine that needs to happen regularly.\n\nLike triggers, each timer has a scope: all games, one server or a specific character. You can disable a timer individually by editing it, or disable all of them through the More options button on the game screen.\n\nTimers only run while the connection is open; when you disconnect, they all stop automatically.\n\nA timer can be shared as well: press and hold it in the list and choose Share.</string>
     <string name="help_sounds_title">Sounds and sound packs</string>
-    <string name="help_sounds_body">jMud supports the MSP protocol, used by MUDs to play sound effects and music. When the game supports it and the Sounds switch is on, sounds play automatically during the session.\n\nWhere the folders live: in the device\'s internal storage there is a folder called Documents, and inside it the jMud folder. Each subfolder of the jMud folder is a sound folder. In a file manager, the path is Internal storage, then Documents, then jMud. Note: it is the Documents folder of the internal storage, not the Documents shortcut shown on the home screen of some file managers.\n\nHow the client uses the folders: each character has an assigned sound folder, chosen when creating or editing the character, which keeps each game\'s sounds separate. When the game or a trigger asks for a sound by name, jMud looks for the file inside that character\'s folder, automatically completing the wav, mp3 and ogg extensions. Sounds the server sends by internet address are downloaded once and kept in a cache.\n\nTo install sounds, use the More options button on the game screen: Download sound pack downloads and installs a pack from a link, and Import ZIP pack installs a file already on your device. Many sound-enabled MUDs distribute these packs on their websites.\n\nTo keep everything organized, the Manage sounds section in Settings lists your folders with the number of files in each one, shows which characters use each folder, and lets you create a folder, delete a folder and assign a folder to a character without editing the character.\n\nTriggers can also play a sound by file name, which lets you create your own sound alerts even in games without MSP.</string>
+    <string name="help_sounds_body">jMud supports the MSP protocol, used by MUDs to play sound effects and music. When the game supports it and the Sounds switch is on, sounds play automatically during the session.\n\nWhere the folders live: in the device\'s internal storage there is a folder called Documents, and inside it the jMud folder. Each subfolder of the jMud folder is a sound folder. In a file manager, the path is Internal storage, then Documents, then jMud. Note: it is the Documents folder of the internal storage, not the Documents shortcut shown on the home screen of some file managers.\n\nHow the client uses the folders: each character has an assigned sound folder, chosen when creating or editing the character, which keeps each game\'s sounds separate. When the game or a trigger asks for a sound by name, jMud looks for the file inside that character\'s folder, automatically completing the wav, mp3 and ogg extensions. Sounds the server sends by internet address are downloaded once and kept in a cache.\n\nTo install sounds, use the More options button on the game screen: Download sound pack downloads and installs a pack from a link, and Import ZIP pack installs a file already on your device. Many sound-enabled MUDs distribute these packs on their websites.\n\nTo keep everything organized, the Manage sounds section in Settings lists your folders with the number of files in each one, shows which characters use each folder, and lets you create a folder, delete a folder and assign a folder to a character without editing the character.\n\nTriggers can also play a sound by file name, which lets you create your own sound alerts even in games without MSP.\n\nAll jMud files live inside a single folder that holds the sound packs, the sound folders of each character and the logs. The first time you open the app it asks where to create that folder: in Documents on internal storage, in the folder of the app itself, or on the memory card if there is one. The folder in Documents shows up in file managers and survives uninstalling; the app folder never depends on permissions but is deleted along with the app; the card is the right pick for large sound packs.\n\nTo change it later, use Settings, Storage section, and the Move files to another storage button. The app copies everything to the new place, checks it file by file and only then deletes the old one, so nothing is lost on the way. If the card is removed, the app falls back to internal storage on its own until you put it back.</string>
     <string name="help_logs_title">Session logs</string>
     <string name="help_logs_body">jMud can record everything that happens in each game session: the messages received and the commands sent. Logs are organized by session, with date and time, character and server.\n\nIn the Logs section of Settings you turn recording on or off, choose how many days the files are kept, from seven days to never delete, and can delete them all at once.\n\nLogs are useful to reread a scene, review a fight or keep important conversations.</string>
-    <string name="help_backup_title">Backup</string>
-    <string name="help_backup_body">In the Backup section of Settings you can export all your data to a single file with the jmud extension: characters, triggers, timers, macros and preferences.\n\nKeep this file somewhere safe, such as your favorite cloud service. When switching devices or reinstalling the app, use Import backup to restore everything at once.\n\nWarning: importing replaces your current data with the data from the file. Sound files are not included in the backup; if needed, reinstall the sound packs through the More options button on the game screen.</string>
+    <string name="help_backup_title">Backup and sharing</string>
+    <string name="help_backup_body">In the Backup section of Settings you export your data to a file with the jmud extension. When you tap Export, the app asks what should go into the file: characters, triggers, timers, macros and app settings. Leave everything selected for a full backup, or select only a part, such as just the macros, to send to someone.\n\nKeep the backup file somewhere safe, such as your favourite cloud service. When switching devices or reinstalling the app, use Import to restore everything.\n\nWhen importing you choose again what to take from the file, type by type, and how to apply it. With Replace what already exists turned off, the items in the file are added to yours without erasing anything, which is how the app starts when the file carries no settings. Turned on, each selected type is swapped for the file contents, which is what you expect when restoring a full backup. You can also redefine the scope of everything coming in, so the imported triggers, timers and macros apply to all games, to one server or to one of your characters.\n\nTo send a single item to someone else, use the Share action on the item itself: press and hold the trigger, timer, macro or character in the list, or open your screen reader actions on that item, and choose Share. The app builds a jmud file with that item and opens the system share menu, so you can send it over WhatsApp, e-mail or any app. Whoever receives it taps the file, chooses to open it with jMud and lands straight on the import screen, where the scope can be picked. Sharing the received message directly into jMud works too.\n\nFor safety, a character sent through the Share action goes without its password and with automatic login turned off; whoever receives it has to fill the password in. The file exported from the Backup section does keep passwords, because it exists to restore your own data: do not share that file.\n\nSound files are not included in the backup; if needed, reinstall the sound packs through the More options button on the game screen.</string>
     <string name="help_about_title">About and updates</string>
     <string name="help_about_body">The About this app section, in Settings, shows the installed version and gathers the Check for update, Open the project page on GitHub and Help buttons, the last one reopening this presentation.\n\njMud notifies you automatically when a new version is available: a window appears with the news and the option to download and install it right away.\n\nThis app is free and open source, created especially for blind players. Suggestions and problem reports are very welcome on the project page on GitHub or through the Send a suggestion by e-mail button, which writes to augustoanacletoprojetos@gmail.com.\n\nGood adventure, and happy gaming!</string>
 </resources>

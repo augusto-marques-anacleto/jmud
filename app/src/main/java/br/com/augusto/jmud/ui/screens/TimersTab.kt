@@ -93,6 +93,7 @@ fun TimersTab(viewModel: MudViewModel) {
                             characters = viewModel.characters,
                             onEdit = { timerToEdit = timer },
                             onRemove = { viewModel.removeTimer(timer) },
+                            onShare = { viewModel.shareTimer(timer) },
                             onLongClick = { timerOptions = timer }
                         )
                     }
@@ -111,6 +112,14 @@ fun TimersTab(viewModel: MudViewModel) {
                             text = stringResource(R.string.action_edit),
                             onClick = {
                                 timerToEdit = target
+                                timerOptions = null
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        AppButton(
+                            text = stringResource(R.string.action_share),
+                            onClick = {
+                                viewModel.shareTimer(target)
                                 timerOptions = null
                             },
                             modifier = Modifier.fillMaxWidth()
@@ -207,10 +216,12 @@ private fun TimerCard(
     characters: List<MudCharacter>,
     onEdit: () -> Unit,
     onRemove: () -> Unit,
+    onShare: () -> Unit,
     onLongClick: () -> Unit
 ) {
     val editLabel = stringResource(R.string.edit_timer)
     val removeLabel = stringResource(R.string.remove_timer)
+    val shareLabel = stringResource(R.string.action_share)
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -218,6 +229,7 @@ private fun TimerCard(
                 role = Role.Button
                 customActions = listOf(
                     CustomAccessibilityAction(editLabel) { onEdit(); true },
+                    CustomAccessibilityAction(shareLabel) { onShare(); true },
                     CustomAccessibilityAction(removeLabel) { onRemove(); true }
                 )
             }

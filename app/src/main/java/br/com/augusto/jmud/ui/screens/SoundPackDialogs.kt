@@ -30,6 +30,13 @@ fun MoreOptionsDialog(
     onTriggersEnabledChange: (Boolean) -> Unit,
     timersEnabled: Boolean,
     onTimersEnabledChange: (Boolean) -> Unit,
+    shortcutPanelEnabled: Boolean,
+    onShortcutPanelEnabledChange: (Boolean) -> Unit,
+    tiltAvailable: Boolean,
+    tiltModeActive: Boolean,
+    onTiltModeChange: (Boolean) -> Unit,
+    onStopMacro: () -> Unit,
+    onStopSound: () -> Unit,
     onDownloadSoundPack: () -> Unit,
     onImportZip: () -> Unit,
     onRecordMacro: () -> Unit,
@@ -43,6 +50,28 @@ fun MoreOptionsDialog(
         title = { Text(stringResource(R.string.more_options)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                AppButton(
+                    text = stringResource(R.string.stop_macro_button),
+                    onClick = onStopMacro,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                AppButton(
+                    text = stringResource(R.string.stop_sound_button),
+                    onClick = onStopSound,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                SwitchRow(
+                    label = stringResource(R.string.shortcut_panel_switch),
+                    checked = shortcutPanelEnabled,
+                    onCheckedChange = onShortcutPanelEnabledChange
+                )
+                if (tiltAvailable) {
+                    SwitchRow(
+                        label = stringResource(R.string.tilt_mode_switch),
+                        checked = tiltModeActive,
+                        onCheckedChange = onTiltModeChange
+                    )
+                }
                 SwitchRow(
                     label = stringResource(R.string.triggers_enabled_switch),
                     checked = triggersEnabled,

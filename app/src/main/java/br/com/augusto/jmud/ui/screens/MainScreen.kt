@@ -1,5 +1,6 @@
 package br.com.augusto.jmud.ui.screens
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -42,8 +44,58 @@ fun AppNavigation(viewModel: MudViewModel) {
         GameScreen(viewModel)
     }
 
+    val shareContext = LocalContext.current
+    val chooserTitle = stringResource(R.string.share_chooser_title)
+    val shareIntent = viewModel.pendingShareIntent.value
+    LaunchedEffect(shareIntent) {
+        if (shareIntent != null) {
+            try {
+                shareContext.startActivity(Intent.createChooser(shareIntent, chooserTitle))
+            } catch (e: Exception) {
+            }
+            viewModel.clearShareIntent()
+        }
+    }
+
+    val incomingBundle = viewModel.pendingImport.value
+    if (incomingBundle != null) {
+        ImportBundleDialog(
+            bundle = incomingBundle,
+            characters = viewModel.characters,
+            onConfirm = { sections, replace, overrideScope, scope, scopeValue ->
+                viewModel.applyImport(sections, replace, overrideScope, scope, scopeValue)
+            },
+            onDismiss = { viewModel.cancelImport() }
+        )
+    }
+
+    val transferMessage = viewModel.backupMessage.value
+    if (transferMessage != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.clearBackupMessage() },
+            title = { Text(stringResource(R.string.settings_backup)) },
+            text = { Text(transferMessage) },
+            confirmButton = {
+                AppButton(
+                    text = stringResource(R.string.action_close),
+                    onClick = { viewModel.clearBackupMessage() }
+                )
+            }
+        )
+    }
+
+    val migrationProgress = viewModel.storageMigrationProgress.value
+    if (migrationProgress != null) {
+        StorageMigrationDialog(
+            progress = migrationProgress,
+            onCancel = { viewModel.cancelStorageMigration() }
+        )
+    }
+
     val helpPage = viewModel.helpStartPage.value
-    if (helpPage != null) {
+    if (viewModel.storageChoiceVisible.value) {
+        StorageChoiceDialog(viewModel)
+    } else if (helpPage != null) {
         GeneralHelpDialog(
             startPage = helpPage,
             onDismiss = { viewModel.closeHelp() }

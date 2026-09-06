@@ -30,10 +30,11 @@ object HelpPages {
     const val TRIGGERS = 5
     const val TIMERS = 6
     const val MACROS = 7
-    const val SOUNDS = 8
-    const val LOGS = 9
-    const val BACKUP = 10
-    const val ABOUT = 11
+    const val SHORTCUTS = 8
+    const val SOUNDS = 9
+    const val LOGS = 10
+    const val BACKUP = 11
+    const val ABOUT = 12
 }
 
 private data class HelpPage(val titleRes: Int, val bodyRes: Int)
@@ -47,6 +48,7 @@ private val helpPages = listOf(
     HelpPage(R.string.help_triggers_title, R.string.help_triggers_body),
     HelpPage(R.string.help_timers_title, R.string.help_timers_body),
     HelpPage(R.string.help_macros_title, R.string.help_macros_body),
+    HelpPage(R.string.help_shortcuts_title, R.string.help_shortcuts_body),
     HelpPage(R.string.help_sounds_title, R.string.help_sounds_body),
     HelpPage(R.string.help_logs_title, R.string.help_logs_body),
     HelpPage(R.string.help_backup_title, R.string.help_backup_body),

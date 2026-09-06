@@ -1,10 +1,12 @@
 package br.com.augusto.jmud.util
 
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipFile
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.net.CookieHandler
 import java.net.CookieManager
@@ -56,11 +58,14 @@ class SoundPackInstaller {
         return null
     }
 
-    private fun open(url: String): HttpURLConnection {
+    private fun open(url: String, rangeFrom: Long = 0L): HttpURLConnection {
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.instanceFollowRedirects = true
         conn.connectTimeout = 10_000
-        conn.readTimeout = 30_000
+        conn.readTimeout = READ_TIMEOUT_MS
+        if (rangeFrom > 0L) {
+            conn.setRequestProperty("Range", "bytes=$rangeFrom-")
+        }
         conn.setRequestProperty(
             "User-Agent",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -71,12 +76,12 @@ class SoundPackInstaller {
     private fun isHtml(conn: HttpURLConnection): Boolean =
         conn.contentType?.contains("text/html") == true
 
-    private fun resolveConnection(rawUrl: String): HttpURLConnection? {
+    private fun resolveConnection(rawUrl: String, rangeFrom: Long = 0L): HttpURLConnection? {
         var url = cleanUrl(rawUrl)
         if (url.isEmpty()) return null
 
         if (url.contains("drive.usercontent.google.com") || url.contains("confirm=")) {
-            return open(url)
+            return open(url, rangeFrom)
         }
 
         val driveId = extractDriveId(url)
@@ -108,13 +113,13 @@ class SoundPackInstaller {
                         }
                         .joinToString("&")
                     val separator = if (action.contains("?")) "&" else "?"
-                    open(if (query.isEmpty()) action else action + separator + query)
+                    open(if (query.isEmpty()) action else action + separator + query, rangeFrom)
                 } else {
                     val token = Regex("confirm=([a-zA-Z0-9_-]+)").find(body)?.groupValues?.get(1)
                     if (token != null) {
-                        open("$downloadUrl&confirm=$token")
+                        open("$downloadUrl&confirm=$token", rangeFrom)
                     } else {
-                        open(downloadUrl)
+                        open(downloadUrl, rangeFrom)
                     }
                 }
             }
@@ -124,7 +129,7 @@ class SoundPackInstaller {
         if (url.contains("dropbox.com")) {
             url = url.replace("dl=0", "dl=1")
         }
-        return open(url)
+        return open(url, rangeFrom)
     }
 
     suspend fun download(
@@ -132,40 +137,76 @@ class SoundPackInstaller {
         destination: File,
         onProgress: (SoundPackProgress) -> Unit
     ): Boolean {
-        val conn = resolveConnection(rawUrl) ?: return false
+        if (destination.exists()) {
+            destination.delete()
+        }
+
+        var consecutiveFailures = 0
+        var attempts = 0
+
+        while (true) {
+            val resumeFrom = if (destination.exists()) destination.length() else 0L
+            attempts++
+            try {
+                return downloadAttempt(rawUrl, destination, resumeFrom, onProgress)
+            } catch (e: IOException) {
+                val progressed = destination.exists() && destination.length() > resumeFrom
+                consecutiveFailures = if (progressed) 0 else consecutiveFailures + 1
+                if (consecutiveFailures > MAX_CONSECUTIVE_FAILURES || attempts >= MAX_ATTEMPTS) {
+                    throw e
+                }
+                delay(RETRY_DELAY_MS * consecutiveFailures.coerceAtLeast(1))
+            }
+        }
+    }
+
+    private suspend fun downloadAttempt(
+        rawUrl: String,
+        destination: File,
+        resumeFrom: Long,
+        onProgress: (SoundPackProgress) -> Unit
+    ): Boolean {
+        val conn = resolveConnection(rawUrl, resumeFrom) ?: return false
         try {
-            if (conn.responseCode >= 400) {
-                throw IOException("HTTP " + conn.responseCode)
+            val code = conn.responseCode
+            if (code >= 400) {
+                throw IOException("HTTP " + code)
             }
             if (isHtml(conn)) {
                 throw IOException("HTML")
             }
 
-            val total = conn.contentLengthLong
-            var downloaded = 0L
+            val resuming = resumeFrom > 0L && code == HttpURLConnection.HTTP_PARTIAL
+            var downloaded = if (resuming) resumeFrom else 0L
+            val body = conn.contentLengthLong
+            val total = if (body > 0L) body + downloaded else -1L
+
             val start = System.currentTimeMillis()
             var lastUi = 0L
 
             conn.inputStream.use { input ->
-                destination.outputStream().use { output ->
+                FileOutputStream(destination, resuming).use { output ->
                     val buffer = ByteArray(256 * 1024)
                     while (true) {
                         currentCoroutineContext().ensureActive()
+                        if (total > 0L && downloaded >= total) break
+
                         val read = input.read(buffer)
                         if (read == -1) break
                         output.write(buffer, 0, read)
                         downloaded += read
 
                         val now = System.currentTimeMillis()
-                        if (now - lastUi >= 1000 || (total > 0 && downloaded == total)) {
+                        if (now - lastUi >= 1000 || (total > 0L && downloaded >= total)) {
                             lastUi = now
                             val elapsed = (now - start) / 1000f
-                            val speedMbps = if (elapsed > 0) {
-                                downloaded / elapsed / (1024f * 1024f)
+                            val transferred = downloaded - if (resuming) resumeFrom else 0L
+                            val speedMbps = if (elapsed > 0f) {
+                                transferred / elapsed / (1024f * 1024f)
                             } else {
                                 0f
                             }
-                            if (total > 0) {
+                            if (total > 0L) {
                                 val remaining = total - downloaded
                                 val etaSeconds = if (speedMbps > 0f) {
                                     (remaining / (speedMbps * 1024f * 1024f)).toInt()
@@ -195,7 +236,12 @@ class SoundPackInstaller {
                             }
                         }
                     }
+                    output.flush()
                 }
+            }
+
+            if (total > 0L && destination.length() < total) {
+                throw IOException("incompleto")
             }
             return true
         } finally {
@@ -306,5 +352,12 @@ class SoundPackInstaller {
             .toString()
     } catch (e: Exception) {
         null
+    }
+
+    private companion object {
+        const val READ_TIMEOUT_MS = 60_000
+        const val MAX_CONSECUTIVE_FAILURES = 4
+        const val MAX_ATTEMPTS = 12
+        const val RETRY_DELAY_MS = 1500L
     }
 }

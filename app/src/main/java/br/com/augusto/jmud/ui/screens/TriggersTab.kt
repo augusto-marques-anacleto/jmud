@@ -95,6 +95,7 @@ fun TriggersTab(viewModel: MudViewModel) {
                             characters = viewModel.characters,
                             onEdit = { triggerToEdit = trigger },
                             onRemove = { viewModel.removeTrigger(trigger) },
+                            onShare = { viewModel.shareTrigger(trigger) },
                             onLongClick = { triggerOptions = trigger }
                         )
                     }
@@ -113,6 +114,14 @@ fun TriggersTab(viewModel: MudViewModel) {
                             text = stringResource(R.string.action_edit),
                             onClick = {
                                 triggerToEdit = target
+                                triggerOptions = null
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        AppButton(
+                            text = stringResource(R.string.action_share),
+                            onClick = {
+                                viewModel.shareTrigger(target)
                                 triggerOptions = null
                             },
                             modifier = Modifier.fillMaxWidth()
@@ -299,10 +308,12 @@ private fun TriggerCard(
     characters: List<MudCharacter>,
     onEdit: () -> Unit,
     onRemove: () -> Unit,
+    onShare: () -> Unit,
     onLongClick: () -> Unit
 ) {
     val editLabel = stringResource(R.string.edit_item, trigger.name)
     val removeLabel = stringResource(R.string.remove_item, trigger.name)
+    val shareLabel = stringResource(R.string.share_item, trigger.name)
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -310,6 +321,7 @@ private fun TriggerCard(
                 role = Role.Button
                 customActions = listOf(
                     CustomAccessibilityAction(editLabel) { onEdit(); true },
+                    CustomAccessibilityAction(shareLabel) { onShare(); true },
                     CustomAccessibilityAction(removeLabel) { onRemove(); true }
                 )
             }

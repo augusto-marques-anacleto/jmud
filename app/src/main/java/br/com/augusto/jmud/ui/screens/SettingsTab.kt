@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
@@ -25,14 +26,18 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import br.com.augusto.jmud.BuildConfig
 import br.com.augusto.jmud.R
+import br.com.augusto.jmud.domain.ShareSection
 import br.com.augusto.jmud.ui.components.AppButton
 import br.com.augusto.jmud.ui.components.AppSlider
 import br.com.augusto.jmud.ui.components.AppTextField
 import br.com.augusto.jmud.ui.components.RadioRow
 import br.com.augusto.jmud.ui.viewmodels.MudViewModel
+import br.com.augusto.jmud.util.IntervalFormat
+import java.text.DecimalFormatSymbols
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -48,7 +53,8 @@ fun SettingsTab(viewModel: MudViewModel) {
     var showEngineDialog by remember { mutableStateOf(false) }
     var showVoiceDialog by remember { mutableStateOf(false) }
     var showRetentionDialog by remember { mutableStateOf(false) }
-    var showImportConfirmDialog by remember { mutableStateOf(false) }
+    var showExportSelectionDialog by remember { mutableStateOf(false) }
+    var showStorageMoveDialog by remember { mutableStateOf(false) }
     var showDeleteLogsDialog by remember { mutableStateOf(false) }
     var showUtf8Warning by remember { mutableStateOf(false) }
 
@@ -56,14 +62,14 @@ fun SettingsTab(viewModel: MudViewModel) {
         ActivityResultContracts.CreateDocument("application/octet-stream")
     ) { uri ->
         if (uri != null) {
-            viewModel.exportBackup(uri)
+            viewModel.exportBundle(uri, viewModel.pendingExportSections.value)
         }
     }
     val importLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri != null) {
-            viewModel.importBackup(uri)
+            viewModel.openImportFromUri(uri)
         }
     }
 
@@ -115,6 +121,37 @@ fun SettingsTab(viewModel: MudViewModel) {
             label = stringResource(R.string.command_separator_label),
             modifier = Modifier.fillMaxWidth()
         )
+        AppTextField(
+            value = viewModel.quitCommands.value,
+            onValueChange = { viewModel.setQuitCommandsSetting(it) },
+            label = stringResource(R.string.quit_commands_label),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Text(
+            text = stringResource(R.string.command_interval_description),
+            style = MaterialTheme.typography.bodyLarge
+        )
+        val decimalSeparator = remember { DecimalFormatSymbols.getInstance().decimalSeparator }
+        var intervalText by remember {
+            mutableStateOf(IntervalFormat.formatMillis(viewModel.commandIntervalMs.value, decimalSeparator))
+        }
+        AppTextField(
+            value = intervalText,
+            onValueChange = { text ->
+                intervalText = text
+                IntervalFormat.parseToMillis(text)?.let { viewModel.setCommandIntervalSetting(it) }
+            },
+            label = stringResource(R.string.command_interval_label),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            modifier = Modifier.fillMaxWidth()
+        )
+        if (IntervalFormat.parseToMillis(intervalText) == null) {
+            Text(
+                text = stringResource(R.string.command_interval_invalid),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
@@ -227,6 +264,35 @@ fun SettingsTab(viewModel: MudViewModel) {
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
         Text(
+            text = stringResource(R.string.settings_storage),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.semantics { heading() }
+        )
+        Text(
+            text = stringResource(R.string.storage_settings_description),
+            style = MaterialTheme.typography.bodyLarge
+        )
+        val storage = viewModel.currentStorage.value
+        Text(
+            text = stringResource(
+                R.string.storage_current_value,
+                viewModel.storageLabelFor(storage),
+                storage.baseDir.absolutePath
+            ),
+            style = MaterialTheme.typography.bodyLarge
+        )
+        AppButton(
+            text = stringResource(R.string.storage_move_button),
+            onClick = {
+                viewModel.refreshStorageOptions()
+                showStorageMoveDialog = true
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+        Text(
             text = stringResource(R.string.settings_backup),
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.semantics { heading() }
@@ -237,15 +303,12 @@ fun SettingsTab(viewModel: MudViewModel) {
         )
         AppButton(
             text = stringResource(R.string.backup_export),
-            onClick = {
-                val date = SimpleDateFormat("yyyy-MM-dd_HH-mm", Locale.US).format(Date())
-                exportLauncher.launch("jmud_backup_$date.jmud")
-            },
+            onClick = { showExportSelectionDialog = true },
             modifier = Modifier.fillMaxWidth()
         )
         AppButton(
             text = stringResource(R.string.backup_import),
-            onClick = { showImportConfirmDialog = true },
+            onClick = { importLauncher.launch(arrayOf("*/*")) },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -345,41 +408,30 @@ fun SettingsTab(viewModel: MudViewModel) {
         )
     }
 
-    if (showImportConfirmDialog) {
-        AlertDialog(
-            onDismissRequest = { showImportConfirmDialog = false },
-            title = { Text(stringResource(R.string.backup_import)) },
-            text = { Text(stringResource(R.string.backup_import_warning)) },
-            confirmButton = {
-                AppButton(
-                    text = stringResource(R.string.backup_import_confirm),
-                    onClick = {
-                        showImportConfirmDialog = false
-                        importLauncher.launch(arrayOf("*/*"))
-                    }
-                )
-            },
-            dismissButton = {
-                AppButton(
-                    text = stringResource(R.string.action_cancel),
-                    onClick = { showImportConfirmDialog = false }
-                )
-            }
+    if (showStorageMoveDialog) {
+        StorageMoveDialog(
+            viewModel = viewModel,
+            onDismiss = { showStorageMoveDialog = false }
         )
     }
 
-    val backupMessage = viewModel.backupMessage.value
-    if (backupMessage != null) {
-        AlertDialog(
-            onDismissRequest = { viewModel.clearBackupMessage() },
-            title = { Text(stringResource(R.string.settings_backup)) },
-            text = { Text(backupMessage) },
-            confirmButton = {
-                AppButton(
-                    text = stringResource(R.string.action_close),
-                    onClick = { viewModel.clearBackupMessage() }
-                )
-            }
+    if (showExportSelectionDialog) {
+        ExportSelectionDialog(
+            counts = mapOf(
+                ShareSection.CHARACTERS to viewModel.characters.size,
+                ShareSection.TRIGGERS to viewModel.triggers.size,
+                ShareSection.TIMERS to viewModel.timers.size,
+                ShareSection.MACROS to viewModel.macros.size,
+                ShareSection.SHORTCUTS to viewModel.shortcuts.size,
+                ShareSection.SETTINGS to 1
+            ),
+            onConfirm = { sections ->
+                viewModel.pendingExportSections.value = sections
+                showExportSelectionDialog = false
+                val date = SimpleDateFormat("yyyy-MM-dd_HH-mm", Locale.US).format(Date())
+                exportLauncher.launch("jmud_$date.jmud")
+            },
+            onDismiss = { showExportSelectionDialog = false }
         )
     }
 

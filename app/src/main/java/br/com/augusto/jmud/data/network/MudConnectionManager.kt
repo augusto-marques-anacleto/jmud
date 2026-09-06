@@ -2,28 +2,41 @@ package br.com.augusto.jmud.data.network
 
 import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
+import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import java.nio.charset.CodingErrorAction
+import java.util.concurrent.Executors
 
 object MudConnectionManager {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private val _events = MutableSharedFlow<MudEvent>()
+    private val writeExecutor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "jmud-outbound").apply { isDaemon = true }
+    }
+    private val writeScope = CoroutineScope(writeExecutor.asCoroutineDispatcher() + SupervisorJob())
+
+    private val _events = MutableSharedFlow<MudEvent>(extraBufferCapacity = EVENT_BUFFER)
     val events: SharedFlow<MudEvent> = _events.asSharedFlow()
 
     private var socket: Socket? = null
+
+    @Volatile
+    private var pendingSocket: Socket? = null
 
     @Volatile
     private var charset: Charset = Charsets.ISO_8859_1
@@ -35,6 +48,10 @@ object MudConnectionManager {
             Charsets.ISO_8859_1
         }
     }
+
+    private const val CONNECT_TIMEOUT_MS = 20000
+    private const val MAX_LINE_BYTES = 64 * 1024
+    private const val EVENT_BUFFER = 256
 
     private const val TELNET_SE = 240
     private const val TELNET_SB = 250
@@ -113,37 +130,90 @@ object MudConnectionManager {
     }
 
     private fun sendRaw(bytes: ByteArray) {
-        try {
-            val output = socket?.getOutputStream() ?: return
-            output.write(bytes)
-            output.flush()
-        } catch (e: Exception) {
-        }
-    }
-
-    fun connect(context: Context, host: String, port: Int) {
-        scope.launch {
+        writeScope.launch {
             try {
-                disconnectSocketOnly()
-                telnetState = TelnetState.DATA
-                telnetVerb = 0
-                val intent = Intent(context, MudService::class.java)
-                ContextCompat.startForegroundService(context, intent)
-
-                val activeSocket = Socket(host, port)
-                activeSocket.keepAlive = true
-                activeSocket.tcpNoDelay = true
-                socket = activeSocket
-
-                _events.emit(MudEvent.Connected)
-                listenForMessages(activeSocket)
+                val output = socket?.getOutputStream() ?: return@launch
+                output.write(bytes)
+                output.flush()
             } catch (e: Exception) {
-                _events.emit(MudEvent.ConnectionFailed(e.message))
             }
         }
     }
 
+    fun connect(context: Context, host: String, port: Int) {
+        val appContext = context.applicationContext
+        scope.launch {
+            disconnectSocketOnly()
+            telnetState = TelnetState.DATA
+            telnetVerb = 0
+
+            if (host.isBlank()) {
+                failConnection(appContext, ConnectionFailureReason.HOST_NOT_FOUND, null)
+                return@launch
+            }
+
+            if (!hasNetwork(appContext)) {
+                failConnection(appContext, ConnectionFailureReason.NO_INTERNET, null)
+                return@launch
+            }
+
+            val activeSocket = Socket()
+            pendingSocket = activeSocket
+            try {
+                activeSocket.connect(InetSocketAddress(host, port), CONNECT_TIMEOUT_MS)
+                activeSocket.keepAlive = true
+                activeSocket.tcpNoDelay = true
+            } catch (e: Exception) {
+                closeQuietly(activeSocket)
+                if (pendingSocket !== activeSocket) return@launch
+                pendingSocket = null
+                val reason = ConnectionFailureClassifier.classify(e, hasNetwork(appContext))
+                failConnection(appContext, reason, e.message)
+                return@launch
+            }
+
+            if (pendingSocket !== activeSocket) {
+                closeQuietly(activeSocket)
+                return@launch
+            }
+            pendingSocket = null
+            socket = activeSocket
+
+            try {
+                ContextCompat.startForegroundService(
+                    appContext,
+                    Intent(appContext, MudService::class.java)
+                )
+            } catch (e: Exception) {
+            }
+
+            _events.emit(MudEvent.Connected)
+            listenForMessages(activeSocket)
+        }
+    }
+
+    private suspend fun failConnection(context: Context, reason: ConnectionFailureReason, detail: String?) {
+        try {
+            context.stopService(Intent(context, MudService::class.java))
+        } catch (e: Exception) {
+        }
+        _events.emit(MudEvent.ConnectionFailed(reason, detail))
+    }
+
+    private fun hasNetwork(context: Context): Boolean {
+        val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+            ?: return true
+        return try {
+            val network = manager.activeNetwork ?: return false
+            val capabilities = manager.getNetworkCapabilities(network) ?: return false
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        } catch (e: Exception) {
+            true
+        }
+    }
+
     private suspend fun listenForMessages(activeSocket: Socket) {
+        var serverClosed = false
         try {
             val inputStream = activeSocket.getInputStream()
             val buffer = ByteArray(8192)
@@ -155,7 +225,10 @@ object MudConnectionManager {
                 try {
                     activeSocket.soTimeout = if (lineBuffer.size() == 0) 0 else 300
                     val bytesRead = inputStream.read(buffer)
-                    if (bytesRead == -1) break
+                    if (bytesRead == -1) {
+                        serverClosed = true
+                        break
+                    }
 
                     val filtered = stripTelnet(buffer, bytesRead, responses)
                     if (responses.size() > 0) {
@@ -168,6 +241,10 @@ object MudConnectionManager {
                             lineBuffer.reset()
                         } else {
                             lineBuffer.write(byte.toInt())
+                            if (lineBuffer.size() >= MAX_LINE_BYTES) {
+                                processLine(decodeBytes(lineBuffer.toByteArray()))
+                                lineBuffer.reset()
+                            }
                         }
                     }
                 } catch (e: SocketTimeoutException) {
@@ -190,7 +267,7 @@ object MudConnectionManager {
             }
             if (isCurrent) {
                 socket = null
-                _events.emit(MudEvent.Disconnected)
+                _events.emit(MudEvent.Disconnected(serverClosed))
             }
         }
     }
@@ -215,7 +292,7 @@ object MudConnectionManager {
     }
 
     fun sendMessage(message: String) {
-        scope.launch {
+        writeScope.launch {
             try {
                 val output = socket?.getOutputStream() ?: throw IllegalStateException()
                 output.write(("$message\r\n").toByteArray(charset))
@@ -227,13 +304,21 @@ object MudConnectionManager {
         }
     }
 
-    private fun disconnectSocketOnly() {
+    private fun closeQuietly(target: Socket?) {
         try {
-            socket?.close()
+            target?.close()
         } catch (e: Exception) {
-        } finally {
-            socket = null
         }
+    }
+
+    private fun disconnectSocketOnly() {
+        val pending = pendingSocket
+        pendingSocket = null
+        closeQuietly(pending)
+
+        val active = socket
+        socket = null
+        closeQuietly(active)
     }
 
     fun closeConnection() {

@@ -49,6 +49,7 @@ fun AppTextField(
 
     val baseInputType = when (keyboardOptions.keyboardType) {
         KeyboardType.Number -> InputType.TYPE_CLASS_NUMBER
+        KeyboardType.Decimal -> InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
         KeyboardType.Email -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
         else -> InputType.TYPE_CLASS_TEXT
     }

@@ -6,6 +6,8 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.net.wifi.WifiManager
+import android.os.PowerManager
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -14,6 +16,9 @@ import br.com.augusto.jmud.R
 
 class MudService : Service() {
     private val channelId = "MudServiceChannel"
+
+    private var wakeLock: PowerManager.WakeLock? = null
+    private var wifiLock: WifiManager.WifiLock? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -34,6 +39,7 @@ class MudService : Service() {
             .setContentText(getString(R.string.notification_connection_active))
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .build()
+        acquireLocks()
         ServiceCompat.startForeground(
             this,
             1,
@@ -59,6 +65,7 @@ class MudService : Service() {
     }
 
     override fun onDestroy() {
+        releaseLocks()
         MudConnectionManager.closeConnection()
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         super.onDestroy()
@@ -66,5 +73,55 @@ class MudService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
+    }
+
+    private fun acquireLocks() {
+        if (wakeLock?.isHeld != true) {
+            wakeLock = try {
+                val power = getSystemService(POWER_SERVICE) as? PowerManager
+                power?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "jMud:conexao")?.apply {
+                    setReferenceCounted(false)
+                    acquire()
+                }
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        if (wifiLock?.isHeld != true) {
+            wifiLock = try {
+                val wifi = applicationContext.getSystemService(WIFI_SERVICE) as? WifiManager
+                val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    WifiManager.WIFI_MODE_FULL_LOW_LATENCY
+                } else {
+                    @Suppress("DEPRECATION")
+                    WifiManager.WIFI_MODE_FULL_HIGH_PERF
+                }
+                wifi?.createWifiLock(mode, "jMud:conexao")?.apply {
+                    setReferenceCounted(false)
+                    acquire()
+                }
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+
+    private fun releaseLocks() {
+        try {
+            if (wakeLock?.isHeld == true) {
+                wakeLock?.release()
+            }
+        } catch (e: Exception) {
+        }
+        wakeLock = null
+
+        try {
+            if (wifiLock?.isHeld == true) {
+                wifiLock?.release()
+            }
+        } catch (e: Exception) {
+        }
+        wifiLock = null
     }
 }

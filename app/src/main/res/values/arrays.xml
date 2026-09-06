@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="direction_shortcut_labels">
+        <item>noroeste</item>
+        <item>norte</item>
+        <item>nordeste</item>
+        <item>oeste</item>
+        <item>olhar</item>
+        <item>leste</item>
+        <item>sudoeste</item>
+        <item>sul</item>
+        <item>sudeste</item>
+        <item>cima</item>
+        <item>baixo</item>
+    </string-array>
+    <string-array name="direction_shortcut_commands">
+        <item>no</item>
+        <item>n</item>
+        <item>ne</item>
+        <item>o</item>
+        <item>olhar</item>
+        <item>l</item>
+        <item>so</item>
+        <item>s</item>
+        <item>se</item>
+        <item>cima</item>
+        <item>baixo</item>
+    </string-array>
+</resources>

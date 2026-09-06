@@ -10,5 +10,6 @@ data class MudCharacter(
     val postConnectCommands: String,
     val useTTS: Boolean,
     val playSounds: Boolean,
-    val soundsFolder: String
+    val soundsFolder: String,
+    val autoReconnect: Boolean = false
 )

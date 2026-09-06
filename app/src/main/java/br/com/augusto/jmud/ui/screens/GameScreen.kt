@@ -13,6 +13,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -29,6 +30,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -61,6 +63,10 @@ import androidx.compose.ui.unit.dp
 import br.com.augusto.jmud.R
 import br.com.augusto.jmud.ui.components.AppButton
 import br.com.augusto.jmud.ui.components.AppTextField
+import br.com.augusto.jmud.domain.MudShortcut
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityViewCommand
+import br.com.augusto.jmud.ui.viewmodels.ConnectionState
 import br.com.augusto.jmud.ui.viewmodels.MacroRecordingState
 import br.com.augusto.jmud.ui.viewmodels.MudViewModel
 import br.com.augusto.jmud.util.StoragePermissions
@@ -170,6 +176,9 @@ fun GameScreen(viewModel: MudViewModel) {
                 reviewIndex = -1
                 commandEditText?.setText("")
                 commandEditText?.requestFocus()
+            } else if (viewModel.connectionState.value == ConnectionState.CONNECTING) {
+                @Suppress("DEPRECATION")
+                view.announceForAccessibility(viewModel.connectionStatusText())
             } else {
                 showDisconnectedSend = true
             }
@@ -219,6 +228,27 @@ fun GameScreen(viewModel: MudViewModel) {
     val hasHardwareKeyboard = configuration.keyboard == Configuration.KEYBOARD_QWERTY &&
         configuration.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO
 
+    val registeredShortcutActions = remember { mutableListOf<Int>() }
+    val panelShortcuts: List<MudShortcut> = viewModel.activeShortcuts()
+    LaunchedEffect(commandEditText, panelShortcuts) {
+        val target = commandEditText ?: return@LaunchedEffect
+        registeredShortcutActions.forEach { actionId ->
+            ViewCompat.removeAccessibilityAction(target, actionId)
+        }
+        registeredShortcutActions.clear()
+        panelShortcuts.take(MAX_SHORTCUT_ACTIONS).forEach { shortcut ->
+            val actionId = ViewCompat.addAccessibilityAction(
+                target,
+                shortcut.label,
+                AccessibilityViewCommand { _, _ ->
+                    viewModel.runShortcut(shortcut)
+                    true
+                }
+            )
+            registeredShortcutActions.add(actionId)
+        }
+    }
+
     LaunchedEffect(commandEditText) {
         val editText = commandEditText ?: return@LaunchedEffect
         editText.requestFocus()
@@ -258,9 +288,10 @@ fun GameScreen(viewModel: MudViewModel) {
                 stringResource(R.string.tab_triggers),
                 stringResource(R.string.tab_timers),
                 stringResource(R.string.tab_macros),
+                stringResource(R.string.tab_shortcuts),
                 stringResource(R.string.tab_settings)
             )
-            TabRow(selectedTabIndex = gameTab) {
+            ScrollableTabRow(selectedTabIndex = gameTab, edgePadding = 0.dp) {
                 gameTabs.forEachIndexed { index, title ->
                     Tab(
                         selected = gameTab == index,
@@ -274,7 +305,8 @@ fun GameScreen(viewModel: MudViewModel) {
                 1 -> TriggersTab(viewModel)
                 2 -> TimersTab(viewModel)
                 3 -> MacrosTab(viewModel)
-                4 -> SettingsTab(viewModel)
+                4 -> ShortcutsTab(viewModel)
+                5 -> SettingsTab(viewModel)
                 else -> Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -305,6 +337,14 @@ fun GameScreen(viewModel: MudViewModel) {
                             modifier = Modifier.weight(1f)
                         )
                     }
+
+                    Text(
+                        text = viewModel.connectionStatusText(),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
 
                     val historyLabel = stringResource(R.string.history_label)
                     LazyColumn(
@@ -408,6 +448,8 @@ fun GameScreen(viewModel: MudViewModel) {
                             }
                         )
                     }
+
+                    ShortcutPanelSlot(viewModel)
 
                     Row(
                         modifier = Modifier
@@ -555,6 +597,19 @@ fun GameScreen(viewModel: MudViewModel) {
                 onTriggersEnabledChange = { viewModel.setTriggersEnabledSetting(it) },
                 timersEnabled = viewModel.timersEnabled.value,
                 onTimersEnabledChange = { viewModel.setTimersEnabledSetting(it) },
+                shortcutPanelEnabled = viewModel.shortcutPanelEnabled.value,
+                onShortcutPanelEnabledChange = { viewModel.setShortcutPanelEnabled(it) },
+                tiltAvailable = viewModel.isTiltAvailable(),
+                tiltModeActive = viewModel.tiltModeActive.value,
+                onTiltModeChange = { viewModel.setTiltModeActive(it) },
+                onStopMacro = {
+                    showMoreOptions = false
+                    viewModel.stopPendingCommands()
+                },
+                onStopSound = {
+                    showMoreOptions = false
+                    viewModel.stopCurrentSounds()
+                },
                 onDownloadSoundPack = {
                     showMoreOptions = false
                     if (viewModel.isSoundPackRunning()) {
@@ -820,3 +875,43 @@ private fun GameToggle(
         )
     }
 }
+
+@Composable
+private fun ShortcutPanelSlot(viewModel: MudViewModel) {
+    if (!viewModel.shortcutPanelEnabled.value) return
+    val shortcuts = viewModel.activeShortcuts()
+    if (shortcuts.isEmpty()) return
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 220.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        shortcuts.chunked(SHORTCUT_COLUMNS).forEach { rowItems ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                rowItems.forEach { shortcut ->
+                    AppButton(
+                        text = shortcut.label,
+                        onClick = { viewModel.runShortcut(shortcut) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .heightIn(min = 56.dp)
+                    )
+                }
+                repeat(SHORTCUT_COLUMNS - rowItems.size) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
+
+private const val SHORTCUT_COLUMNS = 3
+
+private const val MAX_SHORTCUT_ACTIONS = 12

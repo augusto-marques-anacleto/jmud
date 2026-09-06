@@ -87,16 +87,160 @@
     <string name="use_system_rate_pitch">Usar velocidade e tom do sistema</string>
     <string name="test_voice">Testar voz</string>
     <string name="test_voice_message">Esta é a voz configurada do %1$s.</string>
+    <string name="settings_storage">Armazenamento</string>
+    <string name="storage_settings_description">Aqui ficam as pastas do aplicativo: os pacotes de sons, as pastas de sons de cada personagem e os logs de sessão.</string>
+    <string name="storage_choice_title">Onde guardar os arquivos do jMud?</string>
+    <string name="storage_choice_description">Escolha onde o aplicativo vai criar a pasta com os sons e os logs. Você pode mudar depois em Configurações, na seção Armazenamento, e os arquivos são movidos junto.</string>
+    <string name="storage_choice_later">Decidir depois</string>
+    <string name="storage_documents">Documentos do armazenamento interno</string>
+    <string name="storage_app_internal">Pasta do aplicativo na memória interna</string>
+    <string name="storage_removable">Cartão de memória</string>
+    <string name="storage_documents_description">Documentos do armazenamento interno: a pasta aparece em qualquer gerenciador de arquivos e continua no aparelho mesmo se você desinstalar o aplicativo, o que facilita copiar sons pelo computador.</string>
+    <string name="storage_app_internal_description">Pasta do aplicativo na memória interna: é a opção mais confiável, porque nunca depende de permissão de armazenamento, mas os arquivos são apagados junto com o aplicativo se você desinstalar.</string>
+    <string name="storage_removable_description">Cartão de memória: bom para pacotes de sons grandes, já que não ocupa a memória do aparelho. Se o cartão for removido, o aplicativo volta a usar a memória interna até você recolocá-lo.</string>
+    <string name="storage_option_button">%1$s, %2$s</string>
+    <string name="storage_free_space">%1$s livres</string>
+    <string name="storage_free_unknown">espaço desconhecido</string>
+    <string name="storage_current_value">Local atual: %1$s. Pasta: %2$s</string>
+    <string name="storage_selected">Os arquivos do jMud passam a ficar em %1$s. Pasta: %2$s</string>
+    <string name="storage_not_writable">Não foi possível gravar nesse local. Escolha outro armazenamento.</string>
+    <string name="storage_same_location">Esse já é o local atual dos arquivos.</string>
+    <string name="storage_no_other_option">Não há outro armazenamento disponível neste aparelho. Se você tem um cartão de memória, insira o cartão e abra esta tela de novo.</string>
+    <string name="storage_move_button">Mover arquivos para outro armazenamento</string>
+    <string name="storage_move_title">Mover arquivos</string>
+    <string name="storage_move_description">Escolha o novo local. Tudo o que está na pasta atual, incluindo os pacotes de sons e os logs, é copiado para lá e depois apagado do local antigo.</string>
+    <string name="storage_move_confirm">Mover todos os arquivos do jMud para %1$s, na pasta %2$s? Isso pode demorar alguns minutos se você tiver muitos sons.</string>
+    <string name="storage_move_confirm_button">Sim, mover</string>
+    <string name="storage_moving_title">Movendo arquivos</string>
+    <string name="storage_moving_preparing">Preparando a lista de arquivos...</string>
+    <string name="storage_moving_progress">Copiando arquivo %1$d de %2$d. %3$d por cento.</string>
+    <string name="storage_move_ok">Arquivos movidos para %1$s. Pasta: %2$s</string>
+    <string name="storage_move_ok_leftovers">Arquivos copiados para %1$s, mas não foi possível apagar tudo da pasta antiga em %2$s. Você pode apagá-la por um gerenciador de arquivos.</string>
+    <string name="storage_move_cancelled">Migração cancelada. Nada foi apagado do local atual.</string>
+    <string name="storage_move_no_space">Não há espaço suficiente no destino para mover os arquivos.</string>
+    <string name="storage_move_failed">Não foi possível mover os arquivos. Nada foi apagado do local atual.</string>
+
     <string name="settings_backup">Backup</string>
-    <string name="backup_description">O backup inclui personagens, triggers, temporizadores e configurações.</string>
+    <string name="tilt_section_title">Modo inclinação</string>
+    <string name="tilt_description">Em vez de tocar nos botões, você pode inclinar o aparelho para disparar um atalho. Ligue o modo com o aparelho na posição em que você costuma segurá-lo: essa vira a posição de descanso. Inclinar para um lado anuncia o atalho daquela direção e, se você mantiver a inclinação por um instante, ele é enviado com um bipe de confirmação. Voltar à posição de descanso prepara o próximo movimento.</string>
+    <string name="tilt_mode_switch">Modo inclinação ativo</string>
+    <string name="tilt_configure">Configurar inclinação</string>
+    <string name="tilt_mapping_description">Escolha qual atalho seu cada inclinação dispara.</string>
+    <string name="tilt_zone_forward">Inclinar para frente</string>
+    <string name="tilt_zone_backward">Inclinar para trás</string>
+    <string name="tilt_zone_right">Inclinar para a direita</string>
+    <string name="tilt_zone_left">Inclinar para a esquerda</string>
+    <string name="tilt_zone_neutral">Posição de descanso</string>
+    <string name="tilt_zone_value">%1$s: %2$s</string>
+    <string name="tilt_zone_none">nenhum atalho</string>
+    <string name="tilt_zone_unmapped">sem atalho nesta direção</string>
+    <string name="tilt_select_shortcut_title">Atalho para: %1$s</string>
+    <string name="tilt_suggest_mapping">Preencher com os atalhos de direção</string>
+    <string name="tilt_mapping_suggested">Mapeamento preenchido com os atalhos de direção.</string>
+    <string name="tilt_mapping_nothing_to_suggest">Não encontrei atalhos de direção para preencher, ou as direções já estão mapeadas.</string>
+    <string name="tilt_repeat_switch">Repetir enquanto mantiver inclinado</string>
+    <string name="tilt_repeat_description">Com esta opção ligada, manter a inclinação repete o comando no ritmo do intervalo entre comandos das configurações, o que serve para andar ou correr vários passos seguidos. Endireite o aparelho para parar. Desligada, cada passo exige inclinar e voltar.</string>
+    <string name="tilt_sensitivity_title">Quanto inclinar</string>
+    <string name="tilt_sensitivity_value">Quanto inclinar: %1$d graus</string>
+    <string name="tilt_sensitivity_option">%1$d graus</string>
+    <string name="tilt_confirm_title">Tempo para confirmar</string>
+    <string name="tilt_confirm_value">Tempo para confirmar: %1$s segundos</string>
+    <string name="tilt_confirm_option">%1$s segundos</string>
+    <string name="tilt_recalibrate">Recalibrar posição de descanso</string>
+    <string name="tilt_recalibrated">Posição de descanso recalibrada.</string>
+    <string name="tilt_mode_on">Modo inclinação ligado. Mantenha o aparelho parado por um instante na posição de descanso.</string>
+    <string name="tilt_mode_off">Modo inclinação desligado.</string>
+    <string name="tilt_sensor_missing">Este aparelho não tem um sensor de movimento compatível, então o modo inclinação não está disponível.</string>
+
+    <string name="tab_shortcuts">Atalhos</string>
+    <string name="add_shortcut">Adicionar atalho</string>
+    <string name="edit_shortcut_title">Editar atalho</string>
+    <string name="no_shortcuts_saved">Nenhum atalho criado. Use Adicionar atalho para criar o seu ou Adicionar direções para criar de uma vez os atalhos de movimento.</string>
+    <string name="add_direction_shortcuts">Adicionar direções</string>
+    <string name="shortcuts_description">Atalhos são botões com um rótulo e uma ação. Ligue o painel de atalhos para tê-los no rodapé da tela do jogo, onde você acha cada um arrastando o dedo, e use as ações do leitor de telas no campo de comando para chegar neles sem olhar para a tela.</string>
+    <string name="shortcut_panel_switch">Painel de atalhos na tela do jogo</string>
+    <string name="field_shortcut_label">Nome do atalho</string>
+    <string name="field_shortcut_command">Comando enviado</string>
+    <string name="shortcut_action_title">O que o atalho faz</string>
+    <string name="shortcut_action_value">Ação: %1$s</string>
+    <string name="shortcut_action_command">Enviar um comando</string>
+    <string name="shortcut_action_repeat_last">Repetir o último comando</string>
+    <string name="shortcut_action_speak_last">Repetir a última linha recebida</string>
+    <string name="shortcut_action_stop_sound">Interromper som</string>
+    <string name="shortcut_action_stop_macro">Interromper macro</string>
+    <string name="shortcut_sends_command">envia %1$s</string>
+    <string name="shortcut_description">Atalho %1$s, %2$s. %3$s</string>
+    <string name="shortcut_not_connected">Você não está conectado, então o comando não foi enviado.</string>
+    <string name="shortcut_nothing_to_repeat">Nenhum comando anterior para repetir.</string>
+    <string name="shortcut_no_last_line">Ainda não há nenhuma linha no histórico.</string>
+    <string name="share_subject_shortcut">Atalho do jMud: %1$s</string>
+    <string name="direction_shortcuts_already_there">Os atalhos de direção já estão criados.</string>
+    <plurals name="direction_shortcuts_added">
+        <item quantity="one">%d atalho de direção criado.</item>
+        <item quantity="other">%d atalhos de direção criados.</item>
+    </plurals>
+    <plurals name="imported_shortcuts">
+        <item quantity="one">%d atalho</item>
+        <item quantity="other">%d atalhos</item>
+    </plurals>
+    <string name="section_shortcuts">Atalhos</string>
+    <string name="help_shortcuts_title">Atalhos</string>
+    <string name="help_shortcuts_body">Atalho é um botão com um nome e uma ação, criado por você na aba Atalhos. A ação pode ser enviar um comando ao jogo, como norte ou beber cura, ou uma ação do próprio aplicativo: repetir o último comando, repetir a última linha recebida, interromper o som ou interromper a macro em andamento.\n\nO botão Adicionar direções cria de uma vez os atalhos de movimento, já na ordem de uma bússola: noroeste, norte e nordeste na primeira linha, oeste, olhar e leste na segunda, sudoeste, sul e sudeste na terceira, e cima e baixo no final. É o jeito mais rápido de começar sem cadastrar nada à mão.\n\nOs atalhos aparecem de duas formas. A primeira é o painel de atalhos, uma grade de botões no rodapé da tela do jogo, que você liga no interruptor desta aba ou em Mais opções. Ele foi pensado para exploração por toque: encoste o dedo na tela e arraste, que o leitor de telas vai falando o nome de cada botão sem ativar nada. Como a posição não muda, em pouco tempo a mão decora onde fica cada direção e você vai direto, sem precisar deslizar item por item. Para enviar, levante o dedo e dê dois toques, ou ative no seu leitor a opção de ativar levantando o dedo, que aí basta soltar em cima do botão.\n\nA segunda forma não ocupa nada da tela: os atalhos também ficam disponíveis como ações personalizadas do campo de comando. Com o foco no campo onde você digita, abra as ações do seu leitor de telas e os atalhos estarão lá, prontos para escolher. Assim dá para deixar o painel desligado e mesmo assim usar os atalhos, inclusive por um gesto que você mesmo configure no leitor para abrir as ações personalizadas.\n\nCada atalho tem escopo, como triggers e macros: todos os jogos, um servidor ou um personagem. Só aparecem no painel os atalhos do personagem em que você está jogando. E, como o resto, um atalho pode ser compartilhado: toque e segure ele na lista e escolha Compartilhar para mandar para outra pessoa.\n\nAlém do painel e das ações do leitor de telas, há uma terceira forma de disparar um atalho: o modo inclinação, na mesma aba. Ele usa o sensor de movimento do aparelho, que não passa pelo leitor de telas e por isso não disputa gesto nenhum com ele.\n\nVocê liga o modo segurando o aparelho como costuma segurar, e essa posição vira a de descanso, seja você quem estiver sentado, deitado ou no ônibus. A partir daí, inclinar para frente, para trás, para a direita ou para a esquerda dispara o atalho que você mapeou para aquela direção. Ao entrar numa direção o aplicativo fala o nome do atalho, sem enviar nada; se você mantiver a inclinação pelo tempo de confirmação, ele envia e toca um bipe curto. Inclinou sem querer? Volte à posição de descanso antes do tempo e nada acontece.\n\nEm Configurar inclinação você escolhe qual atalho cada direção dispara, quantos graus são necessários para sair da posição de descanso e quanto tempo segurar até confirmar. Se você criou os atalhos pelo botão Adicionar direções, o botão Preencher com os atalhos de direção já mapeia norte, sul, leste e oeste de uma vez. Não é obrigatório usar direções: qualquer atalho seu pode ser mapeado, inclusive os que interrompem o som ou repetem a última linha.\n\nO modo começa sempre desligado e se desliga ao sair do jogo, para o aparelho no bolso nunca sair mandando comando. Aparelhos sem sensor de movimento compatível não mostram essa seção.</string>
+
+    <string name="action_share">Compartilhar</string>
+    <string name="share_item">Compartilhar %1$s</string>
+    <string name="share_chooser_title">Compartilhar com</string>
+    <string name="share_subject_character">Personagem do jMud: %1$s</string>
+    <string name="share_subject_trigger">Trigger do jMud: %1$s</string>
+    <string name="share_subject_timer">Temporizador do jMud: %1$s</string>
+    <string name="share_subject_macro">Macro do jMud: %1$s</string>
+    <string name="share_timer_label">temporizador de %1$d segundos</string>
+    <string name="share_description">%1$s. Abra o arquivo anexado com o aplicativo jMud para importar.</string>
+    <string name="share_failed">Não foi possível preparar o compartilhamento.</string>
+    <string name="import_open_with_label">Importar no jMud</string>
+    <string name="import_title">Importar para o jMud</string>
+    <string name="import_confirm">Importar</string>
+    <string name="import_content_description">Escolha o que importar deste arquivo.</string>
+    <string name="import_invalid_file">Este arquivo não é um backup nem um item do jMud.</string>
+    <string name="import_nothing_selected">Nada foi selecionado para importar.</string>
+    <string name="import_summary">Importado: %1$s.</string>
+    <string name="imported_settings">as configurações do aplicativo</string>
+    <string name="import_mode_replace">Substituir o que já existe</string>
+    <string name="import_mode_replace_description">Cada tipo marcado será substituído pelo conteúdo do arquivo, e o que você tem hoje desses tipos será apagado.</string>
+    <string name="import_mode_add_description">Os itens do arquivo serão somados aos que você já tem, sem apagar nada. Macro com nome repetido recebe um número no final.</string>
+    <string name="import_scope_description">Os itens chegam com o escopo de quem os criou. Você pode manter esse escopo ou definir um novo para todos os itens importados.</string>
+    <string name="import_scope_override">Definir um novo escopo</string>
+    <string name="export_nothing_selected">Nada foi selecionado para exportar.</string>
+    <string name="export_selection_title">O que exportar</string>
+    <string name="export_selection_description">Marque o que deve entrar no arquivo. Para mandar um item só para alguém, use a ação Compartilhar do próprio item na lista. Atenção: personagens exportados aqui levam as senhas salvas, enquanto um personagem enviado pela ação Compartilhar vai sem senha.</string>
+    <string name="section_characters">Personagens</string>
+    <string name="section_triggers">Triggers</string>
+    <string name="section_timers">Temporizadores</string>
+    <string name="section_macros">Macros</string>
+    <string name="section_settings">Configurações do aplicativo</string>
+    <string name="section_with_count">%1$s: %2$d</string>
+    <plurals name="imported_characters">
+        <item quantity="one">%d personagem</item>
+        <item quantity="other">%d personagens</item>
+    </plurals>
+    <plurals name="imported_triggers">
+        <item quantity="one">%d trigger</item>
+        <item quantity="other">%d triggers</item>
+    </plurals>
+    <plurals name="imported_timers">
+        <item quantity="one">%d temporizador</item>
+        <item quantity="other">%d temporizadores</item>
+    </plurals>
+    <plurals name="imported_macros">
+        <item quantity="one">%d macro</item>
+        <item quantity="other">%d macros</item>
+    </plurals>
+
+    <string name="backup_description">O backup pode incluir tudo ou só uma parte: personagens, triggers, temporizadores, macros e configurações do aplicativo. Na hora de importar você também escolhe o que aproveitar do arquivo.</string>
     <string name="backup_export">Exportar backup</string>
     <string name="backup_import">Importar backup</string>
-    <string name="backup_import_warning">Importar um backup substituirá seus personagens, triggers, temporizadores e configurações atuais. Deseja continuar?</string>
-    <string name="backup_import_confirm">Sim, escolher arquivo</string>
     <string name="backup_export_ok">Backup exportado com sucesso.</string>
     <string name="backup_export_failed">Não foi possível exportar o backup.</string>
-    <string name="backup_import_ok">Backup importado com sucesso.</string>
-    <string name="backup_import_failed">Não foi possível importar o backup. Verifique se o arquivo é um backup válido do jMud.</string>
     <string name="settings_updates">Atualizações</string>
     <string name="installed_version">Versão instalada: %1$s</string>
     <string name="check_updates">Verificar atualização</string>
@@ -232,7 +376,7 @@
     <string name="macro_recording_saved">Macro \"%1$s\" salva.</string>
     <string name="macro_not_found">Comando de macro \"%1$s\" não encontrado.</string>
     <string name="help_macros_title">Macros</string>
-    <string name="help_macros_body">Macros são atalhos de comando que você cria. Existem duas formas de criar uma.\n\nComando manual: na aba Macros, defina um nome e uma lista de comandos, um por linha. Para executar, digite # seguido do nome durante o jogo, por exemplo #tapa. Se você digitar mais alguma coisa depois do nome, esse texto é adicionado automaticamente ao final do último comando. Por exemplo, uma macro chamada \"tt\" com o comando \"lan telep\", executada como #tt zanand, envia \"lan telep zanand\", sem precisar escrever nada especial no comando.\n\nPara quem quiser mais controle, isso é opcional: usando $1, $2 e assim por diante dentro dos comandos, cada um recebe uma palavra digitada depois do nome, e $0 recebe todo o texto de uma vez, o que permite posicionar o texto digitado no meio do comando ou repeti-lo em mais de uma linha. Quando os comandos já usam $1, $2 ou $0, o texto não é mais adicionado automaticamente ao final; a posição fica só onde você indicou.\n\nGravação: pelo botão Mais opções na tela do jogo, em Gravar macro, você grava uma sequência de comandos enquanto joga, útil para mapear uma área. Iniciar gravação começa a capturar cada comando que você enviar e volta direto para a tela do jogo, já pronta para digitar. Pausar gravação interrompe a captura sem perder o que já foi gravado, e o mesmo botão vira Retomar gravação para continuar depois. Ignorar último comando remove da gravação o comando mais recente, um de cada vez; quando não houver mais nada para remover, o aplicativo avisa. Parar gravação encerra a captura: se algum comando foi gravado, abre uma tela para nomear e salvar a macro, com a opção de copiar todos os comandos para a área de transferência antes de salvar.\n\nAssim como triggers e temporizadores, cada macro tem um escopo: todos os jogos, um servidor ou um personagem específico. Uma macro desativada não responde quando o nome é digitado.</string>
+    <string name="help_macros_body">Macros são atalhos de comando que você cria. Existem duas formas de criar uma.\n\nComando manual: na aba Macros, defina um nome e uma lista de comandos, um por linha. Para executar, digite # seguido do nome durante o jogo, por exemplo #tapa. Se você digitar mais alguma coisa depois do nome, esse texto é adicionado automaticamente ao final do último comando. Por exemplo, uma macro chamada \"tt\" com o comando \"lan telep\", executada como #tt zanand, envia \"lan telep zanand\", sem precisar escrever nada especial no comando.\n\nPara quem quiser mais controle, isso é opcional: usando $1, $2 e assim por diante dentro dos comandos, cada um recebe uma palavra digitada depois do nome, e $0 recebe todo o texto de uma vez, o que permite posicionar o texto digitado no meio do comando ou repeti-lo em mais de uma linha. Quando os comandos já usam $1, $2 ou $0, o texto não é mais adicionado automaticamente ao final; a posição fica só onde você indicou.\n\nGravação: pelo botão Mais opções na tela do jogo, em Gravar macro, você grava uma sequência de comandos enquanto joga, útil para mapear uma área. Iniciar gravação começa a capturar cada comando que você enviar e volta direto para a tela do jogo, já pronta para digitar. Pausar gravação interrompe a captura sem perder o que já foi gravado, e o mesmo botão vira Retomar gravação para continuar depois. Ignorar último comando remove da gravação o comando mais recente, um de cada vez; quando não houver mais nada para remover, o aplicativo avisa. Parar gravação encerra a captura: se algum comando foi gravado, abre uma tela para nomear e salvar a macro, com a opção de copiar todos os comandos para a área de transferência antes de salvar.\n\nAssim como triggers e temporizadores, cada macro tem um escopo: todos os jogos, um servidor ou um personagem específico. Uma macro desativada não responde quando o nome é digitado.\n\nOs comandos de uma macro são enviados um a um, respeitando o intervalo entre comandos. Por padrão vale o intervalo definido em Configurações, na seção Comandos, e cada macro pode ter o seu próprio, informado em segundos no formulário, com casas decimais se precisar, como 0,4. Deixe esse campo vazio para seguir o padrão. O intervalo existe porque muitos servidores aceitam poucos comandos por segundo, o IntMUD cerca de três, e descartam o excesso silenciosamente: sem espaçamento, uma macro longa de caminhada perderia passos no meio do trajeto.\n\nMacros podem ser compartilhadas: toque e segure a macro na lista e escolha Compartilhar para enviar aquele atalho para outra pessoa.</string>
 
     <string name="open_link_title">Abrir link</string>
     <string name="open_link_question">Deseja abrir este link no navegador?</string>
@@ -268,8 +412,43 @@
     <string name="sound_pack_permission_required_title">Permissão necessária</string>
     <string name="sound_pack_permission_required_message">É necessário conceder a permissão de armazenamento para baixar ou importar pacotes de sons. Conceda a permissão e tente novamente.</string>
 
+    <string name="stop_macro_button">Interromper macro</string>
+    <string name="stop_sound_button">Interromper som</string>
+    <string name="macro_interrupted">Macro interrompida. Os comandos que ainda não tinham sido enviados foram descartados.</string>
+    <string name="macro_nothing_running">Nenhuma macro em execução.</string>
+    <string name="sounds_interrupted">Som interrompido.</string>
+
+    <string name="command_interval_description">Intervalo mínimo entre comandos enviados em sequência: macros, separador de comandos, comandos de triggers, temporizadores e comandos pós-conexão. Vários servidores limitam quantos comandos aceitam por segundo e descartam o excesso sem avisar; no IntMUD o limite fica em torno de três comandos por segundo. Aceita números decimais, por exemplo 0,4. Use 0 para enviar sem intervalo.</string>
+    <string name="command_interval_label">Intervalo entre comandos, em segundos</string>
+    <string name="command_interval_invalid">Valor inválido. Informe os segundos em número, por exemplo 0,4.</string>
+    <string name="macro_name_no_spaces">O nome da macro não pode ter espaços, porque só a primeira palavra depois do sustenido é usada para chamá-la. Use um nome único, como rota_norte.</string>
+    <string name="field_macro_interval">Intervalo entre comandos desta macro, em segundos</string>
+    <string name="macro_interval_hint">Deixe vazio para usar o intervalo padrão das configurações, hoje %1$s segundos.</string>
+    <string name="macro_interval_suffix"> Intervalo próprio de %1$s segundos entre comandos.</string>
+
+    <string name="auto_reconnect_switch">Reconectar automaticamente</string>
+    <string name="reconnect_scheduled">Tentando reconectar em %1$d segundos. Tentativa %2$d de %3$d.</string>
+    <string name="reconnect_trying">Reconectando. Tentativa %1$d de %2$d.</string>
+    <string name="reconnected">Reconectado.</string>
+    <string name="reconnect_gave_up">Não foi possível reconectar depois de %1$d tentativas. Use Reconectar quando quiser tentar de novo.</string>
+    <string name="notifications_denied_warning">Aviso: a permissão de notificações está negada. A conexão pode ser encerrada pelo sistema quando você sair da tela do jogo. Libere as notificações do jMud nas configurações do Android.</string>
+
     <string name="connecting_to">Conectando a %1$s:%2$d...</string>
-    <string name="connection_error">Erro de conexão: %1$s</string>
+    <string name="connection_failed_reason">Não foi possível conectar. Motivo: %1$s</string>
+    <string name="connection_reason_no_internet">o aparelho está sem conexão com a internet.</string>
+    <string name="connection_reason_host_not_found">o endereço do servidor não foi encontrado. Verifique o endereço digitado e a sua internet.</string>
+    <string name="connection_reason_server_unavailable">o servidor recusou a conexão. Ele pode estar fora do ar.</string>
+    <string name="connection_reason_timeout">o servidor não respondeu a tempo. Ele pode estar fora do ar ou a sua internet está instável.</string>
+    <string name="connection_reason_unknown">falha não identificada na conexão.</string>
+    <string name="connection_reason_detail">%1$s Detalhe técnico: %2$s</string>
+    <string name="connection_status_label">Status da conexão: %1$s</string>
+    <string name="connection_status_connecting">conectando</string>
+    <string name="connection_status_connected">conectado</string>
+    <string name="connection_status_failed">conexão não realizada</string>
+    <string name="connection_status_disconnected">desconectado</string>
+    <string name="quit_commands_label">Comandos que encerram a sessão, separados por vírgula</string>
+    <string name="session_ended_by_you">Sessão encerrada por você.</string>
+    <string name="connection_lost">Aviso: Conexão perdida.</string>
     <string name="server_closed_connection">Aviso: Conexão encerrada pelo servidor.</string>
     <string name="send_failed">Aviso: Não foi possível enviar o comando.</string>
 
@@ -324,23 +503,27 @@
     <string name="help_overview_title">Visão geral</string>
     <string name="help_overview_body">O jMud é um cliente de MUD criado para ser totalmente acessível com leitores de tela. MUDs são jogos de texto multijogador acessados pela internet: o servidor envia descrições e acontecimentos em texto, e você joga digitando comandos.\n\nA tela inicial tem quatro abas na parte de baixo: Personagens, para salvar seus jogos e conectar; Triggers, para reagir automaticamente a mensagens do jogo; Temporizadores, para repetir comandos de tempos em tempos; e Configurações, para ajustar voz, sons, logs e backup.\n\nDurante o jogo, as mesmas abas aparecem na parte de cima da tela, então dá para criar triggers, temporizadores e mudar configurações sem desconectar.\n\nUse os botões Anterior e Próximo para navegar por esta ajuda. Você pode reabri-la quando quiser em Configurações, na seção Sobre este aplicativo.</string>
     <string name="help_characters_title">Personagens e conexão</string>
-    <string name="help_characters_body">Na aba Personagens você salva os jogos que costuma acessar. Toque em Adicionar e informe o nome do personagem, o endereço do servidor, a porta e, se quiser, a senha.\n\nCom a opção de login automático ativada, o jMud envia o nome e a senha assim que a conexão é estabelecida, e você entra no jogo sem digitar nada. No campo de comandos após conectar, você pode listar comandos, um por linha, que serão enviados logo depois do login.\n\nCada personagem também guarda suas preferências de sintetizador de voz e de sons, além da pasta de sons usada por aquele jogo. No botão Escolher Pasta, você seleciona uma pasta existente ou cria uma nova, e o aplicativo sugere um nome com base no endereço do servidor. Onde as pastas ficam e como gerenciá-las é explicado em detalhes na página Sons e pacotes de sons desta ajuda.\n\nPara conectar, basta tocar no personagem na lista. Um toque longo abre as opções de editar e remover; essas ações também aparecem no menu de ações do leitor de tela.\n\nO botão Conexão Manual permite conectar a qualquer servidor informando apenas endereço e porta, sem salvar personagem.</string>
+    <string name="help_characters_body">Na aba Personagens você salva os jogos que costuma acessar. Toque em Adicionar e informe o nome do personagem, o endereço do servidor, a porta e, se quiser, a senha.\n\nCom a opção de login automático ativada, o jMud envia o nome e a senha assim que a conexão é estabelecida, e você entra no jogo sem digitar nada. No campo de comandos após conectar, você pode listar comandos, um por linha, que serão enviados logo depois do login.\n\nCada personagem também guarda suas preferências de sintetizador de voz e de sons, além da pasta de sons usada por aquele jogo. No botão Escolher Pasta, você seleciona uma pasta existente ou cria uma nova, e o aplicativo sugere um nome com base no endereço do servidor. Onde as pastas ficam e como gerenciá-las é explicado em detalhes na página Sons e pacotes de sons desta ajuda.\n\nPara conectar, basta tocar no personagem na lista. Um toque longo abre as opções de editar e remover; essas ações também aparecem no menu de ações do leitor de tela.\n\nO botão Conexão Manual permite conectar a qualquer servidor informando apenas endereço e porta, sem salvar personagem.
+
+No cadastro de cada personagem existe a opção Reconectar automaticamente, desligada por padrão. Com ela ligada, se a conexão daquele personagem cair sozinha, por queda de sinal ou porque o sistema encerrou a conexão enquanto o aplicativo estava em segundo plano, o jMud tenta reconectar até cinco vezes, esperando 5, 10, 20, 30 e 60 segundos entre as tentativas, e avisa cada passo. O histórico da sessão não é perdido e o login automático roda de novo. Quando você mesmo desconecta ou sai do jogo, ele não tenta nada.
+
+Para saber a diferença entre você sair e o jogo derrubar a conexão, o aplicativo olha o último comando enviado. Em Configurações, na seção Comandos, existe a lista de comandos que encerram a sessão, que já vem com fim, sair, quit, exit e logout. Se você enviou um deles pouco antes da conexão cair, o jMud entende que a saída foi sua e não reconecta. Se o MUD derrubou por tempo parado, ou se o sinal caiu, ele reconecta. Se o seu jogo usa outra palavra para sair, acrescente-a nessa lista.</string>
     <string name="help_game_title">Tela do jogo</string>
-    <string name="help_game_body">A tela do jogo mostra o histórico de mensagens, o campo de comando e o botão Enviar.\n\nNo topo há dois interruptores: Sintetizador, que controla se as mensagens recebidas são faladas, e Sons, que controla os efeitos sonoros. O botão Mais opções reúne outras ações: ativar ou desativar triggers e temporizadores, baixar ou importar pacotes de sons e desconectar.\n\nNo histórico, você pode ler as mensagens linha por linha com o leitor de telas. O botão Rolar para o final leva às mensagens mais recentes, e Limpar histórico apaga a tela.\n\nEscreva no campo de comando e toque em Enviar. Com o campo vazio, Enviar repete o último comando, prático para andar ou repetir ações.\n\nSe você usa teclado físico, a página Jogando com o teclado desta ajuda explica os atalhos disponíveis.\n\nUm toque longo no botão Enviar abre os históricos nomeados, listas separadas que os triggers podem alimentar, como um canal de conversa ou registros de combate. Quando uma mensagem contém um link, dá para abri-lo tocando na linha.</string>
+    <string name="help_game_body">A tela do jogo mostra o histórico de mensagens, o campo de comando e o botão Enviar.\n\nNo topo há dois interruptores: Sintetizador, que controla se as mensagens recebidas são faladas, e Sons, que controla os efeitos sonoros. O botão Mais opções reúne outras ações: interromper a macro em andamento, interromper o som que está tocando, ativar ou desativar triggers e temporizadores, baixar ou importar pacotes de sons, gravar macro e desconectar.\n\nInterromper som para na hora a música e os efeitos que estiverem tocando naquele momento, sem desligar o interruptor Sons: os próximos sons continuam funcionando normalmente. Interromper macro descarta os comandos de uma sequência que ainda não foram enviados, útil quando uma macro longa começou por engano ou levou você para o lugar errado.\n\nNo histórico, você pode ler as mensagens linha por linha com o leitor de telas. O botão Rolar para o final leva às mensagens mais recentes, e Limpar histórico apaga a tela.\n\nEscreva no campo de comando e toque em Enviar. Com o campo vazio, Enviar repete o último comando, prático para andar ou repetir ações.\n\nSe você usa teclado físico, a página Jogando com o teclado desta ajuda explica os atalhos disponíveis.\n\nUm toque longo no botão Enviar abre os históricos nomeados, listas separadas que os triggers podem alimentar, como um canal de conversa ou registros de combate. Quando uma mensagem contém um link, dá para abri-lo tocando na linha.\n\nSe o painel de atalhos estiver ligado, ele fica no rodapé, abaixo do campo de comando, com um botão para cada atalho seu. A página Atalhos desta ajuda explica como usá-lo.</string>
     <string name="help_keyboard_title">Jogando com o teclado</string>
     <string name="help_keyboard_body">Se você conecta um teclado físico ao aparelho, o jMud oferece atalhos para jogar com agilidade.\n\nCom o foco no campo de comando: a tecla Enter envia o que está escrito e, com o campo vazio, envia novamente o último comando, o que facilita repetir ações e andar pelo jogo. As teclas Page Up e Page Down leem o histórico linha por linha sem tirar o foco do campo: a revisão começa pela mensagem mais recente, Page Up volta para as linhas anteriores e Page Down avança para as mais novas. Cada linha é anunciada pelo leitor de telas. Ao enviar um comando, a revisão volta para o fim do histórico.\n\nCom o foco na lista do histórico: as setas para cima e para baixo leem linha por linha, Page Up e Page Down pulam dez linhas de uma vez, Home vai para a primeira mensagem, End vai para a última e Escape devolve o foco ao campo de comando.\n\nObservação: o uso do teclado no aplicativo pode variar dependendo do teclado e do leitor de telas utilizados, que podem apresentar comportamentos diferentes entre si.</string>
     <string name="help_multi_commands_title">Vários comandos de uma vez</string>
-    <string name="help_multi_commands_body">Você pode enviar vários comandos de uma vez separando-os por espaço, arroba, espaço. Por exemplo: falar bom dia! @ falar tudo bem? envia os dois comandos em sequência, na ordem em que foram escritos.\n\nO arroba foi escolhido por ser fácil de alcançar no teclado do celular, mas o separador é seu: em Configurações, na seção Comandos, você pode trocá-lo por ponto e vírgula ou qualquer outro texto, ou deixar o campo vazio para desativar o recurso.\n\nComo o separador padrão inclui os espaços em volta, um arroba colado em outra palavra, como em um endereço de e-mail, não divide nada.</string>
+    <string name="help_multi_commands_body">Você pode enviar vários comandos de uma vez separando-os por espaço, arroba, espaço. Por exemplo: falar bom dia! @ falar tudo bem? envia os dois comandos em sequência, na ordem em que foram escritos.\n\nO arroba foi escolhido por ser fácil de alcançar no teclado do celular, mas o separador é seu: em Configurações, na seção Comandos, você pode trocá-lo por ponto e vírgula ou qualquer outro texto, ou deixar o campo vazio para desativar o recurso.\n\nComo o separador padrão inclui os espaços em volta, um arroba colado em outra palavra, como em um endereço de e-mail, não divide nada.\n\nOs comandos separados não são disparados todos de uma vez: o aplicativo respeita o intervalo entre comandos definido em Configurações, na seção Comandos. Vários servidores aceitam um número limitado de comandos por segundo e descartam sem avisar o que passa disso.</string>
     <string name="help_triggers_title">Triggers</string>
-    <string name="help_triggers_body">Triggers são reações automáticas a mensagens do jogo. Quando uma linha recebida corresponde ao texto configurado, o jMud pode enviar comandos em resposta, tocar um som da sua pasta de sons, guardar a linha em um histórico nomeado ou ignorar a linha, deixando de falar e de mostrar mensagens repetitivas.\n\nCada trigger tem um escopo: pode valer para todos os jogos, para um servidor específico ou para um único personagem. Também é possível desativar um trigger sem apagá-lo, ou desativar todos de uma vez pelo botão Mais opções na tela do jogo.\n\nOs tipos de correspondência incluem começa com, contém, termina com, mensagem exata e padrão com variáveis, que permite capturar partes da mensagem e usá-las nos comandos de resposta.\n\nA aba Triggers tem um botão Ajuda próprio com a explicação detalhada de cada tipo, dos padrões e das variáveis, com vários exemplos prontos.</string>
+    <string name="help_triggers_body">Triggers são reações automáticas a mensagens do jogo. Quando uma linha recebida corresponde ao texto configurado, o jMud pode enviar comandos em resposta, tocar um som da sua pasta de sons, guardar a linha em um histórico nomeado ou ignorar a linha, deixando de falar e de mostrar mensagens repetitivas.\n\nCada trigger tem um escopo: pode valer para todos os jogos, para um servidor específico ou para um único personagem. Também é possível desativar um trigger sem apagá-lo, ou desativar todos de uma vez pelo botão Mais opções na tela do jogo.\n\nOs tipos de correspondência incluem começa com, contém, termina com, mensagem exata e padrão com variáveis, que permite capturar partes da mensagem e usá-las nos comandos de resposta.\n\nA aba Triggers tem um botão Ajuda próprio com a explicação detalhada de cada tipo, dos padrões e das variáveis, com vários exemplos prontos.\n\nPara enviar um trigger pronto para outra pessoa, toque e segure o trigger na lista e escolha Compartilhar. Quem receber importa em poucos toques, sem precisar montar o trigger na mão.</string>
     <string name="help_timers_title">Temporizadores</string>
-    <string name="help_timers_body">Temporizadores enviam comandos automaticamente de tempos em tempos enquanto você está conectado. Ao criar um, você define o intervalo em segundos e os comandos, um por linha.\n\nSão úteis para manter a conexão ativa em jogos que desconectam por inatividade, para repetir ações de treino ou para qualquer rotina que precise acontecer com regularidade.\n\nAssim como os triggers, cada temporizador tem escopo: todos os jogos, um servidor ou um personagem específico. Você pode desativar um temporizador individualmente ao editá-lo, ou desativar todos pelo botão Mais opções na tela do jogo.\n\nOs temporizadores só funcionam com a conexão aberta; ao desconectar, todos param automaticamente.</string>
+    <string name="help_timers_body">Temporizadores enviam comandos automaticamente de tempos em tempos enquanto você está conectado. Ao criar um, você define o intervalo em segundos e os comandos, um por linha.\n\nSão úteis para manter a conexão ativa em jogos que desconectam por inatividade, para repetir ações de treino ou para qualquer rotina que precise acontecer com regularidade.\n\nAssim como os triggers, cada temporizador tem escopo: todos os jogos, um servidor ou um personagem específico. Você pode desativar um temporizador individualmente ao editá-lo, ou desativar todos pelo botão Mais opções na tela do jogo.\n\nOs temporizadores só funcionam com a conexão aberta; ao desconectar, todos param automaticamente.\n\nUm temporizador também pode ser compartilhado: toque e segure ele na lista e escolha Compartilhar.</string>
     <string name="help_sounds_title">Sons e pacotes de sons</string>
-    <string name="help_sounds_body">O jMud tem suporte ao protocolo MSP, usado pelos MUDs para tocar efeitos sonoros e músicas. Quando o jogo tem esse suporte e o interruptor Sons está ativado, os sons tocam automaticamente durante a partida.\n\nOnde as pastas ficam: no armazenamento interno do aparelho existe uma pasta chamada Documents, e dentro dela fica a pasta jMud. Cada subpasta da pasta jMud é uma pasta de sons. No gerenciador de arquivos, o caminho é Armazenamento interno, depois Documents, depois jMud. Atenção: é a pasta Documents do armazenamento interno, e não o atalho Documentos que aparece na tela inicial de alguns gerenciadores.\n\nComo o cliente usa as pastas: cada personagem tem uma pasta de sons atribuída, escolhida ao criar ou editar o personagem, o que mantém os sons de cada jogo separados. Quando o jogo ou um trigger pede um som pelo nome, o jMud procura o arquivo dentro da pasta daquele personagem, completando sozinho as extensões wav, mp3 e ogg. Sons que o servidor manda por endereço da internet são baixados uma vez e guardados em cache.\n\nPara instalar sons, use o botão Mais opções na tela do jogo: Baixar pacote de sons baixa e instala um pacote a partir de um link, e Importar pacote ZIP instala um arquivo que já esteja no seu aparelho. Muitos MUDs com suporte a som distribuem esses pacotes em seus sites.\n\nPara organizar tudo, a seção Gerenciar sons das Configurações lista suas pastas com a quantidade de arquivos de cada uma, mostra quais personagens usam cada pasta e permite criar uma pasta, excluir uma pasta e atribuir uma pasta a um personagem sem precisar editá-lo.\n\nOs triggers também podem tocar um som pelo nome do arquivo, o que permite criar seus próprios alertas sonoros mesmo em jogos sem MSP.</string>
+    <string name="help_sounds_body">O jMud tem suporte ao protocolo MSP, usado pelos MUDs para tocar efeitos sonoros e músicas. Quando o jogo tem esse suporte e o interruptor Sons está ativado, os sons tocam automaticamente durante a partida.\n\nOnde as pastas ficam: no armazenamento interno do aparelho existe uma pasta chamada Documents, e dentro dela fica a pasta jMud. Cada subpasta da pasta jMud é uma pasta de sons. No gerenciador de arquivos, o caminho é Armazenamento interno, depois Documents, depois jMud. Atenção: é a pasta Documents do armazenamento interno, e não o atalho Documentos que aparece na tela inicial de alguns gerenciadores.\n\nComo o cliente usa as pastas: cada personagem tem uma pasta de sons atribuída, escolhida ao criar ou editar o personagem, o que mantém os sons de cada jogo separados. Quando o jogo ou um trigger pede um som pelo nome, o jMud procura o arquivo dentro da pasta daquele personagem, completando sozinho as extensões wav, mp3 e ogg. Sons que o servidor manda por endereço da internet são baixados uma vez e guardados em cache.\n\nPara instalar sons, use o botão Mais opções na tela do jogo: Baixar pacote de sons baixa e instala um pacote a partir de um link, e Importar pacote ZIP instala um arquivo que já esteja no seu aparelho. Muitos MUDs com suporte a som distribuem esses pacotes em seus sites.\n\nPara organizar tudo, a seção Gerenciar sons das Configurações lista suas pastas com a quantidade de arquivos de cada uma, mostra quais personagens usam cada pasta e permite criar uma pasta, excluir uma pasta e atribuir uma pasta a um personagem sem precisar editá-lo.\n\nOs triggers também podem tocar um som pelo nome do arquivo, o que permite criar seus próprios alertas sonoros mesmo em jogos sem MSP.\n\nOs arquivos do jMud ficam todos dentro de uma pasta só, que guarda os pacotes de sons, as pastas de sons de cada personagem e os logs. Na primeira vez que você abre o aplicativo, ele pergunta onde criar essa pasta: nos Documentos do armazenamento interno, na pasta do próprio aplicativo, ou no cartão de memória, se houver um. A pasta em Documentos aparece em gerenciadores de arquivos e sobrevive à desinstalação; a pasta do aplicativo nunca depende de permissão, mas é apagada junto com o aplicativo; o cartão é indicado para pacotes de sons grandes.\n\nPara trocar depois, use Configurações, seção Armazenamento, no botão Mover arquivos para outro armazenamento. O aplicativo copia tudo para o novo local, confere arquivo por arquivo e só então apaga o antigo, então nada é perdido no caminho. Se o cartão for retirado, o aplicativo volta sozinho para a memória interna até você recolocá-lo.</string>
     <string name="help_logs_title">Logs de sessão</string>
     <string name="help_logs_body">O jMud pode gravar tudo o que acontece em cada sessão de jogo: as mensagens recebidas e os comandos enviados. Os logs são organizados por sessão, com data e hora, personagem e servidor.\n\nNa seção Logs das Configurações você ativa ou desativa a gravação, escolhe por quantos dias os arquivos ficam guardados, de sete dias a nunca apagar, e pode apagar todos de uma vez.\n\nOs logs são úteis para reler uma cena, conferir um combate ou guardar conversas importantes.</string>
-    <string name="help_backup_title">Backup</string>
-    <string name="help_backup_body">Na seção Backup das Configurações você pode exportar todos os seus dados para um único arquivo com a extensão jmud: personagens, triggers, temporizadores, macros e preferências.\n\nGuarde esse arquivo em um lugar seguro, como seu serviço de nuvem preferido. Ao trocar de aparelho ou reinstalar o aplicativo, use Importar backup para recuperar tudo de uma vez.\n\nAtenção: a importação substitui os dados atuais pelos do arquivo. Os arquivos de som não entram no backup; se precisar, reinstale os pacotes de sons pelo botão Mais opções na tela do jogo.</string>
+    <string name="help_backup_title">Backup e compartilhamento</string>
+    <string name="help_backup_body">Na seção Backup das Configurações você exporta seus dados para um arquivo com a extensão jmud. Ao tocar em Exportar, o aplicativo pergunta o que deve entrar no arquivo: personagens, triggers, temporizadores, macros e configurações do aplicativo. Deixe tudo marcado para um backup completo ou marque só uma parte, por exemplo apenas as macros, para mandar para alguém.\n\nGuarde o arquivo de backup em um lugar seguro, como seu serviço de nuvem preferido. Ao trocar de aparelho ou reinstalar o aplicativo, use Importar para recuperar tudo.\n\nNa importação você escolhe de novo o que aproveitar do arquivo, item por tipo, e como aplicar. Com Substituir o que já existe desligado, os itens do arquivo são somados aos seus, sem apagar nada, e é assim que o aplicativo começa quando o arquivo não traz configurações. Ligado, cada tipo marcado é trocado pelo conteúdo do arquivo, que é o que se espera ao restaurar um backup completo. Você também pode redefinir o escopo de tudo que está entrando, para que os triggers, temporizadores e macros importados valham para todos os jogos, para um servidor ou para um personagem seu.\n\nPara mandar um item só para outra pessoa, use a ação Compartilhar do próprio item: toque e segure o trigger, o temporizador, a macro ou o personagem na lista, ou abra as ações do leitor de telas nesse item, e escolha Compartilhar. O aplicativo gera um arquivo jmud com aquele item e abre o menu de compartilhamento do sistema, então dá para enviar pelo WhatsApp, por e-mail ou por qualquer aplicativo. Quem receber toca no arquivo, escolhe abrir com o jMud e cai direto na tela de importação, já podendo escolher o escopo. Também funciona compartilhar a mensagem recebida diretamente para o jMud.\n\nPor segurança, um personagem enviado pela ação Compartilhar vai sem a senha e com o login automático desligado; quem receber precisa preencher a senha. Já o arquivo exportado pela seção Backup guarda as senhas, porque a ideia ali é restaurar os seus próprios dados: não compartilhe esse arquivo.\n\nOs arquivos de som não entram no backup; se precisar, reinstale os pacotes de sons pelo botão Mais opções na tela do jogo.</string>
     <string name="help_about_title">Sobre e atualizações</string>
     <string name="help_about_body">A seção Sobre este aplicativo, nas Configurações, mostra a versão instalada e reúne os botões Verificar atualização, Abrir página do projeto no GitHub e Ajuda, que reabre esta apresentação.\n\nO jMud avisa automaticamente quando há uma nova versão: aparece uma janela com as novidades e a opção de baixar e instalar na hora.\n\nEste aplicativo é gratuito e de código aberto, criado especialmente para jogadores cegos. Sugestões e avisos de problemas são muito bem-vindos na página do projeto no GitHub ou pelo botão Enviar sugestão por e-mail, que escreve para augustoanacletoprojetos@gmail.com.\n\nBoa aventura, e bons jogos!</string>
 </resources>

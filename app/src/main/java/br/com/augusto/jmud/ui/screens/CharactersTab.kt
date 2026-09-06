@@ -103,6 +103,7 @@ fun CharactersTab(viewModel: MudViewModel, context: Context) {
                             onConnect = { viewModel.connect(character) },
                             onEdit = { characterToEdit = character },
                             onRemove = { viewModel.removeCharacter(character) },
+                            onShare = { viewModel.shareCharacter(character) },
                             onLongClick = { characterOptions = character }
                         )
                     }
@@ -121,6 +122,14 @@ fun CharactersTab(viewModel: MudViewModel, context: Context) {
                             text = stringResource(R.string.action_edit),
                             onClick = {
                                 characterToEdit = target
+                                characterOptions = null
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        AppButton(
+                            text = stringResource(R.string.action_share),
+                            onClick = {
+                                viewModel.shareCharacter(target)
                                 characterOptions = null
                             },
                             modifier = Modifier.fillMaxWidth()
@@ -150,8 +159,8 @@ fun CharactersTab(viewModel: MudViewModel, context: Context) {
                 initialCharacter = null,
                 context = context,
                 onDismiss = { showAddDialog = false },
-                onSave = { name, host, port, password, autoLogin, commands, useTTS, playSounds, soundsFolder ->
-                    viewModel.addCharacter(name, host, port, password, autoLogin, commands, useTTS, playSounds, soundsFolder)
+                onSave = { name, host, port, password, autoLogin, commands, useTTS, playSounds, soundsFolder, autoReconnect ->
+                    viewModel.addCharacter(name, host, port, password, autoLogin, commands, useTTS, playSounds, soundsFolder, autoReconnect)
                     showAddDialog = false
                 }
             )
@@ -162,7 +171,7 @@ fun CharactersTab(viewModel: MudViewModel, context: Context) {
                 initialCharacter = target,
                 context = context,
                 onDismiss = { characterToEdit = null },
-                onSave = { name, host, port, password, autoLogin, commands, useTTS, playSounds, soundsFolder ->
+                onSave = { name, host, port, password, autoLogin, commands, useTTS, playSounds, soundsFolder, autoReconnect ->
                     viewModel.updateCharacter(
                         target.copy(
                             name = name,
@@ -173,6 +182,7 @@ fun CharactersTab(viewModel: MudViewModel, context: Context) {
                             postConnectCommands = commands,
                             useTTS = useTTS,
                             playSounds = playSounds,
+                            autoReconnect = autoReconnect,
                             soundsFolder = soundsFolder
                         )
                     )
@@ -197,10 +207,12 @@ private fun CharacterCard(
     onConnect: () -> Unit,
     onEdit: () -> Unit,
     onRemove: () -> Unit,
+    onShare: () -> Unit,
     onLongClick: () -> Unit
 ) {
     val editLabel = stringResource(R.string.edit_item, character.name)
     val removeLabel = stringResource(R.string.remove_item, character.name)
+    val shareLabel = stringResource(R.string.share_item, character.name)
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -208,6 +220,7 @@ private fun CharacterCard(
                 role = Role.Button
                 customActions = listOf(
                     CustomAccessibilityAction(editLabel) { onEdit(); true },
+                    CustomAccessibilityAction(shareLabel) { onShare(); true },
                     CustomAccessibilityAction(removeLabel) { onRemove(); true }
                 )
             }
@@ -270,6 +283,11 @@ fun ManualConnectionDialog(
                     checked = viewModel.manualPlaySounds.value,
                     onCheckedChange = { viewModel.manualPlaySounds.value = it }
                 )
+                SwitchRow(
+                    label = stringResource(R.string.auto_reconnect_switch),
+                    checked = viewModel.manualAutoReconnect.value,
+                    onCheckedChange = { viewModel.manualAutoReconnect.value = it }
+                )
             }
         },
         confirmButton = {
@@ -295,12 +313,13 @@ fun ManualConnectionDialog(
 internal fun SwitchRow(
     label: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val stateOn = stringResource(R.string.switch_on)
     val stateOff = stringResource(R.string.switch_off)
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .toggleable(
                 value = checked,
@@ -330,7 +349,7 @@ fun AddCharacterDialog(
     initialCharacter: MudCharacter?,
     context: Context,
     onDismiss: () -> Unit,
-    onSave: (String, String, Int, String, Boolean, String, Boolean, Boolean, String) -> Unit
+    onSave: (String, String, Int, String, Boolean, String, Boolean, Boolean, String, Boolean) -> Unit
 ) {
     var name by remember { mutableStateOf(initialCharacter?.name ?: "") }
     var host by remember { mutableStateOf(initialCharacter?.host ?: "") }
@@ -340,6 +359,7 @@ fun AddCharacterDialog(
     var commands by remember { mutableStateOf(initialCharacter?.postConnectCommands ?: "") }
     var useTTS by remember { mutableStateOf(initialCharacter?.useTTS ?: true) }
     var playSounds by remember { mutableStateOf(initialCharacter?.playSounds ?: true) }
+    var autoReconnect by remember { mutableStateOf(initialCharacter?.autoReconnect ?: false) }
     var soundsFolder by remember { mutableStateOf(initialCharacter?.soundsFolder ?: "") }
     var showFolderSelector by remember { mutableStateOf(false) }
     var showSoundsFolderRequired by remember { mutableStateOf(false) }
@@ -470,6 +490,11 @@ fun AddCharacterDialog(
                     checked = playSounds,
                     onCheckedChange = { playSounds = it }
                 )
+                SwitchRow(
+                    label = stringResource(R.string.auto_reconnect_switch),
+                    checked = autoReconnect,
+                    onCheckedChange = { autoReconnect = it }
+                )
             }
         },
         confirmButton = {
@@ -480,7 +505,7 @@ fun AddCharacterDialog(
                         showSoundsFolderRequired = true
                     } else {
                         val portInt = port.toIntOrNull() ?: 4000
-                        onSave(name, host, portInt, password, autoLogin && password.isNotBlank(), commands, useTTS, playSounds, soundsFolder)
+                        onSave(name, host, portInt, password, autoLogin && password.isNotBlank(), commands, useTTS, playSounds, soundsFolder, autoReconnect)
                     }
                 },
                 enabled = isFormValid
@@ -507,7 +532,7 @@ fun FolderSelectorDialog(
 
     var folders by remember {
         mutableStateOf<List<String>>(
-            baseAppDir.listFiles()?.filter { it.isDirectory }?.map { it.name } ?: emptyList()
+            AppStorage.soundFolders(context)
         )
     }
     var showCreatePrompt by remember { mutableStateOf(false) }
@@ -519,7 +544,7 @@ fun FolderSelectorDialog(
             name = name,
             onDismiss = { showCreatePrompt = false },
             onFolderCreated = { newFolderName ->
-                folders = baseAppDir.listFiles()?.filter { it.isDirectory }?.map { it.name } ?: emptyList()
+                folders = AppStorage.soundFolders(context)
                 onFolderSelected(newFolderName)
                 showCreatePrompt = false
             }

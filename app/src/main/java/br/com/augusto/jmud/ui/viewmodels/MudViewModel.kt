@@ -1,7 +1,12 @@
 package br.com.augusto.jmud.ui.viewmodels
 
+import android.Manifest
 import android.app.Application
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.net.Uri
+import android.os.SystemClock
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -12,22 +17,43 @@ import br.com.augusto.jmud.R
 import br.com.augusto.jmud.data.local.CharacterRepository
 import br.com.augusto.jmud.data.local.MacroRepository
 import br.com.augusto.jmud.data.local.SettingsRepository
+import br.com.augusto.jmud.data.local.ShortcutRepository
 import br.com.augusto.jmud.data.local.TimerRepository
 import br.com.augusto.jmud.data.local.TriggerRepository
+import br.com.augusto.jmud.data.network.ConnectionFailureReason
 import br.com.augusto.jmud.data.network.MudConnectionManager
 import br.com.augusto.jmud.data.network.MudEvent
 import br.com.augusto.jmud.domain.MudCharacter
 import br.com.augusto.jmud.domain.MudMacro
+import br.com.augusto.jmud.domain.MudShortcut
 import br.com.augusto.jmud.domain.MudTimer
 import br.com.augusto.jmud.domain.MudTrigger
+import br.com.augusto.jmud.domain.ShortcutAction
+import br.com.augusto.jmud.domain.ShortcutDirection
 import br.com.augusto.jmud.domain.Scope
+import br.com.augusto.jmud.domain.ShareBundle
+import br.com.augusto.jmud.domain.ShareKind
+import br.com.augusto.jmud.domain.ShareSection
 import br.com.augusto.jmud.util.AppStorage
 import br.com.augusto.jmud.util.BackupManager
 import br.com.augusto.jmud.util.ExtractResult
+import br.com.augusto.jmud.util.IntervalFormat
 import br.com.augusto.jmud.util.LogManager
 import br.com.augusto.jmud.util.MacroEngine
+import br.com.augusto.jmud.util.MigrationProgress
+import br.com.augusto.jmud.util.MigrationResult
 import br.com.augusto.jmud.util.MspParser
 import br.com.augusto.jmud.util.MudAudioManager
+import br.com.augusto.jmud.util.QuitCommands
+import br.com.augusto.jmud.util.ShareFormat
+import br.com.augusto.jmud.util.ShareManager
+import br.com.augusto.jmud.util.StorageMigrator
+import br.com.augusto.jmud.util.StorageOption
+import br.com.augusto.jmud.util.StorageType
+import br.com.augusto.jmud.util.ToneFeedback
+import br.com.augusto.jmud.util.TiltSensorController
+import br.com.augusto.jmud.util.TiltZone
+import br.com.augusto.jmud.util.TiltZones
 import br.com.augusto.jmud.util.SoundPackInstaller
 import br.com.augusto.jmud.util.SoundPackNotifier
 import br.com.augusto.jmud.util.SoundPackProgress
@@ -45,13 +71,20 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 
 enum class AppScreen { MAIN, GAME }
 
 enum class MacroRecordingState { NONE, RECORDING, PAUSED }
+
+enum class ConnectionState { DISCONNECTED, CONNECTING, CONNECTED, FAILED }
 
 class MudViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -59,19 +92,28 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
     private val timerRepository = TimerRepository(application)
     private val triggerRepository = TriggerRepository(application)
     private val macroRepository = MacroRepository(application)
+    private val shortcutRepository = ShortcutRepository(application)
     private val settingsRepository = SettingsRepository(application)
     private val backupManager = BackupManager(application)
     private val updateManager = UpdateManager(application)
     private val ttsManager = TTSManager(application)
     private val audioManager = MudAudioManager(application)
     private val logManager = LogManager(application)
+    private val shareManager = ShareManager(application)
+    private val storageMigrator = StorageMigrator()
+    private val toneFeedback = ToneFeedback()
 
     private val timerJobs = mutableListOf<Job>()
+
+    private val outboundMutex = Mutex()
+    private val outboundJobs = mutableListOf<Job>()
+    private var lastTransmitAt = 0L
 
     val characters = mutableStateListOf<MudCharacter>()
     val timers = mutableStateListOf<MudTimer>()
     val triggers = mutableStateListOf<MudTrigger>()
     val macros = mutableStateListOf<MudMacro>()
+    val shortcuts = mutableStateListOf<MudShortcut>()
     var macroRecordingState = mutableStateOf(MacroRecordingState.NONE)
     val recordedMacroCommands = mutableStateListOf<String>()
     val gameMessages = mutableStateListOf<String>()
@@ -84,6 +126,7 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
     var currentScreen = mutableStateOf(AppScreen.MAIN)
     var activeCharacter = mutableStateOf<MudCharacter?>(null)
     var isConnected = mutableStateOf(false)
+    var connectionState = mutableStateOf(ConnectionState.DISCONNECTED)
     var lastSentCommand = mutableStateOf("")
     var userJustSentCommand = mutableStateOf(false)
     var flushNextTTS = mutableStateOf(false)
@@ -95,6 +138,7 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
     var manualPort = mutableStateOf(repository.getManualPort())
     var manualUseTTS = mutableStateOf(repository.getManualUseTTS())
     var manualPlaySounds = mutableStateOf(repository.getManualPlaySounds())
+    var manualAutoReconnect = mutableStateOf(repository.getManualAutoReconnect())
 
     var soundPackProgress = mutableStateOf<SoundPackProgress?>(null)
     var soundPackDialogVisible = mutableStateOf(false)
@@ -113,7 +157,34 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
     var triggersEnabled = mutableStateOf(settingsRepository.getTriggersEnabled())
     var timersEnabled = mutableStateOf(settingsRepository.getTimersEnabled())
     var commandSeparator = mutableStateOf(settingsRepository.getCommandSeparator())
+    var quitCommands = mutableStateOf(settingsRepository.getQuitCommands())
+    var commandIntervalMs = mutableStateOf(settingsRepository.getCommandIntervalMs())
+    var shortcutPanelEnabled = mutableStateOf(settingsRepository.getShortcutPanelEnabled())
+    var tiltModeActive = mutableStateOf(false)
+    var tiltTriggerDegrees = mutableStateOf(settingsRepository.getTiltTriggerDegrees())
+    var tiltConfirmMs = mutableStateOf(settingsRepository.getTiltConfirmMs())
+    var tiltRepeatEnabled = mutableStateOf(settingsRepository.getTiltRepeatEnabled())
+    val tiltMapping = mutableStateMapOf<String, String>()
+
+    private val tiltSensor = TiltSensorController(
+        application,
+        object : TiltSensorController.Listener {
+            override fun onZoneEntered(zone: TiltZone) = announceTiltZone(zone)
+            override fun onZoneConfirmed(zone: TiltZone) = runTiltZone(zone, true)
+            override fun onZoneRepeated(zone: TiltZone) = runTiltZone(zone, false)
+        }
+    )
     var backupMessage = mutableStateOf<String?>(null)
+    var pendingImport = mutableStateOf<ShareBundle?>(null)
+    var pendingExportSections = mutableStateOf<Set<ShareSection>>(emptySet())
+
+    var storageChoiceVisible = mutableStateOf(false)
+    var storageOptions = mutableStateListOf<StorageOption>()
+    var currentStorage = mutableStateOf(AppStorage.currentOption(application))
+    var storageReady = mutableStateOf(false)
+    var storageMigrationProgress = mutableStateOf<MigrationProgress?>(null)
+    private var storageMigrationJob: Job? = null
+    var pendingShareIntent = mutableStateOf<Intent?>(null)
     var logsMessage = mutableStateOf<String?>(null)
 
     var welcomeVisible = mutableStateOf(!settingsRepository.getWelcomeShown())
@@ -125,12 +196,35 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
     var updateMessage = mutableStateOf<String?>(null)
     private var updateJob: Job? = null
     private var autoLoginJob: Job? = null
+    private var reconnectJob: Job? = null
+    private var reconnectAttempt = 0
+    private var quitRequestedAt = 0L
 
     init {
         characters.addAll(repository.loadCharacters())
         timers.addAll(timerRepository.loadTimers())
         triggers.addAll(triggerRepository.loadTriggers())
         macros.addAll(macroRepository.loadMacros())
+        shortcuts.addAll(shortcutRepository.loadShortcuts())
+        for (zone in TiltZones.MAPPABLE_ZONES) {
+            val stored = settingsRepository.getTiltShortcut(zone.name)
+            if (stored.isNotBlank()) {
+                tiltMapping[zone.name] = stored
+            }
+        }
+
+        viewModelScope.launch {
+            val needsChoice = withContext(Dispatchers.IO) {
+                val needs = AppStorage.needsLocationChoice(application)
+                if (!needs) {
+                    AppStorage.baseDir(application)
+                }
+                needs
+            }
+            storageChoiceVisible.value = needsChoice
+            storageReady.value = !needsChoice
+            refreshStorageOptions()
+        }
 
         MudConnectionManager.setEncoding(encoding.value)
         if (ttsEngine.value.isNotBlank()) {
@@ -153,16 +247,35 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
                     MudEvent.Connected -> onConnected()
                     is MudEvent.LineReceived -> onLineReceived(event.text)
                     is MudEvent.ConnectionFailed -> {
-                        postStatusMessage(getString(R.string.connection_error, event.detail ?: ""))
-                        onDisconnected()
+                        postStatusMessage(connectionFailureMessage(event.reason, event.detail))
+                        onDisconnected(ConnectionState.FAILED)
+                        if (reconnectAttempt > 0) {
+                            scheduleReconnect()
+                        }
                     }
-                    MudEvent.Disconnected -> {
-                        postStatusMessage(getString(R.string.server_closed_connection))
-                        onDisconnected()
+                    is MudEvent.Disconnected -> {
+                        val askedToQuit = quitRequestedRecently()
+                        postStatusMessage(
+                            getString(
+                                when {
+                                    askedToQuit -> R.string.session_ended_by_you
+                                    event.serverClosed -> R.string.server_closed_connection
+                                    else -> R.string.connection_lost
+                                }
+                            )
+                        )
+                        onDisconnected(ConnectionState.DISCONNECTED)
+                        if (!askedToQuit) {
+                            scheduleReconnect()
+                        }
                     }
                     MudEvent.SendFailed -> {
+                        val askedToQuit = quitRequestedRecently()
                         postStatusMessage(getString(R.string.send_failed))
-                        onDisconnected()
+                        onDisconnected(ConnectionState.DISCONNECTED)
+                        if (!askedToQuit) {
+                            scheduleReconnect()
+                        }
                     }
                 }
             }
@@ -171,6 +284,36 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun getString(resId: Int, vararg args: Any): String =
         getApplication<Application>().getString(resId, *args)
+
+    private fun connectionFailureMessage(reason: ConnectionFailureReason, detail: String?): String {
+        val reasonText = getString(
+            when (reason) {
+                ConnectionFailureReason.NO_INTERNET -> R.string.connection_reason_no_internet
+                ConnectionFailureReason.HOST_NOT_FOUND -> R.string.connection_reason_host_not_found
+                ConnectionFailureReason.SERVER_UNAVAILABLE -> R.string.connection_reason_server_unavailable
+                ConnectionFailureReason.TIMEOUT -> R.string.connection_reason_timeout
+                ConnectionFailureReason.UNKNOWN -> R.string.connection_reason_unknown
+            }
+        )
+        val fullReason = if (reason == ConnectionFailureReason.UNKNOWN && !detail.isNullOrBlank()) {
+            getString(R.string.connection_reason_detail, reasonText, detail)
+        } else {
+            reasonText
+        }
+        return getString(R.string.connection_failed_reason, fullReason)
+    }
+
+    fun connectionStatusText(): String = getString(
+        R.string.connection_status_label,
+        getString(
+            when (connectionState.value) {
+                ConnectionState.CONNECTING -> R.string.connection_status_connecting
+                ConnectionState.CONNECTED -> R.string.connection_status_connected
+                ConnectionState.FAILED -> R.string.connection_status_failed
+                ConnectionState.DISCONNECTED -> R.string.connection_status_disconnected
+            }
+        )
+    )
 
     private fun onLineReceived(rawMessage: String) {
         val parsedMsp = MspParser.parse(rawMessage)
@@ -222,14 +365,7 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
             }
             if (trigger.commands.isNotBlank()) {
                 val commands = TriggerEngine.expandCommands(trigger.commands, match)
-                if (commands.isNotEmpty()) {
-                    viewModelScope.launch {
-                        for (cmd in commands) {
-                            transmit(cmd)
-                            delay(300)
-                        }
-                    }
-                }
+                sendThrottledSequence(commands, commandIntervalMs.value)
             }
         }
     }
@@ -270,40 +406,54 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun onConnected() {
+        connectionState.value = ConnectionState.CONNECTED
+        isConnected.value = true
+        if (reconnectAttempt > 0) {
+            postStatusMessage(getString(R.string.reconnected))
+        }
+        reconnectAttempt = 0
+        reconnectJob = null
         val character = activeCharacter.value ?: return
+        startTimers(character)
         autoLoginJob?.cancel()
         autoLoginJob = viewModelScope.launch {
             delay(500)
             if (character.autoLogin && character.name.isNotBlank() && character.password.isNotBlank()) {
                 if (!isConnected.value) return@launch
-                transmit(character.name.trim())
+                transmitThrottled(character.name.trim(), commandIntervalMs.value)
                 delay(500)
                 if (!isConnected.value) return@launch
-                transmit(character.password)
+                transmitThrottled(character.password, commandIntervalMs.value)
                 delay(500)
             }
             for (cmd in character.postConnectCommands.split("\n")) {
                 if (cmd.isNotBlank()) {
                     if (!isConnected.value) return@launch
-                    transmit(cmd.trim())
-                    delay(300)
+                    transmitThrottled(cmd.trim(), commandIntervalMs.value)
                 }
             }
         }
     }
 
-    private fun onDisconnected() {
+    private fun onDisconnected(state: ConnectionState) {
         autoLoginJob?.cancel()
         autoLoginJob = null
-        if (!isConnected.value) return
+        if (connectionState.value == ConnectionState.DISCONNECTED ||
+            connectionState.value == ConnectionState.FAILED
+        ) {
+            return
+        }
+        connectionState.value = state
         isConnected.value = false
+        setTiltModeActive(false)
+        cancelOutboundJobs()
         stopTimers()
         audioManager.stopAll()
         logManager.endSession()
         MudConnectionManager.disconnect(getApplication())
     }
 
-    fun addCharacter(name: String, host: String, port: Int, password: String, autoLogin: Boolean, commands: String, useTTS: Boolean, playSounds: Boolean, soundsFolder: String) {
+    fun addCharacter(name: String, host: String, port: Int, password: String, autoLogin: Boolean, commands: String, useTTS: Boolean, playSounds: Boolean, soundsFolder: String, autoReconnect: Boolean) {
         val newCharacter = MudCharacter(
             id = UUID.randomUUID().toString(),
             name = name,
@@ -314,7 +464,8 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
             postConnectCommands = commands,
             useTTS = useTTS,
             playSounds = playSounds,
-            soundsFolder = soundsFolder
+            soundsFolder = soundsFolder,
+            autoReconnect = autoReconnect
         )
         characters.add(newCharacter)
         repository.saveCharacters(characters)
@@ -419,8 +570,251 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         postStatusMessage(getString(R.string.macro_recording_saved, name.trim()))
     }
 
+    fun saveShortcut(shortcut: MudShortcut) {
+        val index = shortcuts.indexOfFirst { it.id == shortcut.id }
+        if (index != -1) {
+            shortcuts[index] = shortcut
+        } else {
+            shortcuts.add(shortcut)
+        }
+        shortcutRepository.saveShortcuts(shortcuts)
+    }
+
+    fun removeShortcut(shortcut: MudShortcut) {
+        shortcuts.remove(shortcut)
+        shortcutRepository.saveShortcuts(shortcuts)
+    }
+
+    fun setShortcutPanelEnabled(value: Boolean) {
+        shortcutPanelEnabled.value = value
+        settingsRepository.saveShortcutPanelEnabled(value)
+    }
+
+    fun activeShortcuts(): List<MudShortcut> {
+        val character = activeCharacter.value
+        return shortcuts.filter { shortcut ->
+            shortcut.enabled && (character == null || scopeMatches(shortcut.scope, shortcut.scopeValue, character))
+        }
+    }
+
+    fun addDirectionShortcuts() {
+        val resources = getApplication<Application>().resources
+        val labels = resources.getStringArray(R.array.direction_shortcut_labels)
+        val commands = resources.getStringArray(R.array.direction_shortcut_commands)
+        var added = 0
+        for (index in labels.indices) {
+            val label = labels[index]
+            val command = commands.getOrNull(index) ?: continue
+            val direction = ShortcutDirection.PRESET_ORDER.getOrNull(index) ?: ""
+            val alreadyThere = shortcuts.any { existing ->
+                existing.scope == Scope.ALL &&
+                    (
+                        (direction.isNotBlank() && existing.direction == direction) ||
+                            existing.label.equals(label, ignoreCase = true)
+                        )
+            }
+            if (alreadyThere) continue
+            shortcuts.add(
+                MudShortcut(
+                    id = UUID.randomUUID().toString(),
+                    label = label,
+                    command = command,
+                    action = ShortcutAction.COMMAND,
+                    scope = Scope.ALL,
+                    scopeValue = "",
+                    enabled = true,
+                    direction = direction
+                )
+            )
+            added++
+        }
+        if (added > 0) {
+            shortcutRepository.saveShortcuts(shortcuts)
+        }
+        backupMessage.value = if (added > 0) {
+            quantityText(R.plurals.direction_shortcuts_added, added)
+        } else {
+            getString(R.string.direction_shortcuts_already_there)
+        }
+    }
+
+    fun isTiltAvailable(): Boolean = tiltSensor.isAvailable()
+
+    fun tiltShortcutFor(zone: TiltZone): MudShortcut? {
+        val id = tiltMapping[zone.name] ?: return null
+        return shortcuts.firstOrNull { it.id == id }
+    }
+
+    private fun activeTiltShortcutFor(zone: TiltZone): MudShortcut? {
+        val mapped = tiltShortcutFor(zone) ?: return null
+        return activeShortcuts().firstOrNull { it.id == mapped.id }
+    }
+
+    fun setTiltShortcut(zone: TiltZone, shortcutId: String) {
+        if (shortcutId.isBlank()) {
+            tiltMapping.remove(zone.name)
+        } else {
+            tiltMapping[zone.name] = shortcutId
+        }
+        settingsRepository.saveTiltShortcut(zone.name, shortcutId)
+    }
+
+    private fun tiltRepeatMs(): Int = if (tiltRepeatEnabled.value) {
+        commandIntervalMs.value.coerceAtLeast(MIN_TILT_REPEAT_MS)
+    } else {
+        0
+    }
+
+    private fun restartTiltIfActive() {
+        if (!tiltModeActive.value) return
+        tiltSensor.start(tiltTriggerDegrees.value, tiltConfirmMs.value, tiltRepeatMs())
+    }
+
+    fun setTiltTriggerDegrees(value: Int) {
+        tiltTriggerDegrees.value = value
+        settingsRepository.saveTiltTriggerDegrees(value)
+        restartTiltIfActive()
+    }
+
+    fun setTiltConfirmMs(value: Int) {
+        tiltConfirmMs.value = value
+        settingsRepository.saveTiltConfirmMs(value)
+        restartTiltIfActive()
+    }
+
+    fun setTiltRepeatEnabled(value: Boolean) {
+        tiltRepeatEnabled.value = value
+        settingsRepository.saveTiltRepeatEnabled(value)
+        restartTiltIfActive()
+    }
+
+    fun suggestTiltMapping() {
+        val resources = getApplication<Application>().resources
+        val labels = resources.getStringArray(R.array.direction_shortcut_labels)
+        val byZone = listOf(
+            Triple(TiltZone.FORWARD, ShortcutDirection.NORTH, labels.getOrNull(1)),
+            Triple(TiltZone.BACKWARD, ShortcutDirection.SOUTH, labels.getOrNull(7)),
+            Triple(TiltZone.RIGHT, ShortcutDirection.EAST, labels.getOrNull(5)),
+            Triple(TiltZone.LEFT, ShortcutDirection.WEST, labels.getOrNull(3))
+        )
+        var filled = 0
+        for ((zone, direction, label) in byZone) {
+            if (!tiltMapping[zone.name].isNullOrBlank()) continue
+            val match = shortcuts.firstOrNull { it.direction == direction }
+                ?: shortcuts.firstOrNull { label != null && it.label.equals(label, ignoreCase = true) }
+                ?: continue
+            setTiltShortcut(zone, match.id)
+            filled++
+        }
+        backupMessage.value = if (filled > 0) {
+            getString(R.string.tilt_mapping_suggested)
+        } else {
+            getString(R.string.tilt_mapping_nothing_to_suggest)
+        }
+    }
+
+    fun setTiltModeActive(active: Boolean) {
+        if (active == tiltModeActive.value) return
+        if (active) {
+            if (!tiltSensor.isAvailable()) {
+                postStatusMessage(getString(R.string.tilt_sensor_missing))
+                return
+            }
+            val started = tiltSensor.start(tiltTriggerDegrees.value, tiltConfirmMs.value, tiltRepeatMs())
+            if (!started) {
+                postStatusMessage(getString(R.string.tilt_sensor_missing))
+                return
+            }
+            tiltModeActive.value = true
+            postStatusMessage(getString(R.string.tilt_mode_on))
+        } else {
+            tiltSensor.stop()
+            tiltModeActive.value = false
+            postStatusMessage(getString(R.string.tilt_mode_off))
+        }
+    }
+
+    fun onAppBackgrounded() {
+        if (tiltModeActive.value) {
+            tiltSensor.stop()
+        }
+    }
+
+    fun onAppForegrounded() {
+        if (tiltModeActive.value) {
+            tiltSensor.start(tiltTriggerDegrees.value, tiltConfirmMs.value, tiltRepeatMs())
+        }
+    }
+
+    fun recalibrateTilt() {
+        if (!tiltModeActive.value) return
+        tiltSensor.recalibrate()
+        postStatusMessage(getString(R.string.tilt_recalibrated))
+    }
+
+    private fun announceTiltZone(zone: TiltZone) {
+        val shortcut = activeTiltShortcutFor(zone)
+        val label = shortcut?.label ?: getString(R.string.tilt_zone_unmapped)
+        if (currentGameUseTTS.value) {
+            ttsManager.speak(label, true)
+        } else {
+            announcements.tryEmit(label)
+        }
+    }
+
+    private fun runTiltZone(zone: TiltZone, firstTime: Boolean) {
+        val shortcut = activeTiltShortcutFor(zone) ?: return
+        if (firstTime) {
+            toneFeedback.beep()
+        }
+        runShortcut(shortcut)
+    }
+
+    fun runShortcut(shortcut: MudShortcut) {
+        when (shortcut.action) {
+            ShortcutAction.STOP_SOUND -> stopCurrentSounds()
+            ShortcutAction.STOP_MACRO -> stopPendingCommands()
+            ShortcutAction.SPEAK_LAST -> speakLastLine()
+            ShortcutAction.REPEAT_LAST -> sendShortcutCommand("")
+            else -> sendShortcutCommand(shortcut.command)
+        }
+    }
+
+    private fun sendShortcutCommand(command: String) {
+        if (!isConnected.value) {
+            postStatusMessage(getString(R.string.shortcut_not_connected))
+            return
+        }
+        if (command.isBlank() && lastSentCommand.value.isBlank()) {
+            postStatusMessage(getString(R.string.shortcut_nothing_to_repeat))
+            return
+        }
+        sendMessage(command)
+    }
+
+    private fun speakLastLine() {
+        val line = gameMessages.lastOrNull { it.isNotBlank() }
+        if (line == null) {
+            postStatusMessage(getString(R.string.shortcut_no_last_line))
+            return
+        }
+        if (currentGameUseTTS.value) {
+            ttsManager.speak(line, true)
+        } else {
+            announcements.tryEmit(line)
+        }
+    }
+
+    fun shareShortcut(shortcut: MudShortcut) {
+        shareBundle(
+            ShareBundle(kind = ShareKind.SHARE, shortcuts = listOf(shortcut)),
+            shortcut.label,
+            getString(R.string.share_subject_shortcut, shortcut.label)
+        )
+    }
+
     fun runMacro(macro: MudMacro) {
-        sendExpandedMacroCommands(MacroEngine.expandCommands(macro.commands, ""))
+        sendThrottledSequence(MacroEngine.expandCommands(macro.commands, ""), macroIntervalMs(macro))
     }
 
     fun removeTrigger(trigger: MudTrigger) {
@@ -476,8 +870,8 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
                     if (!isConnected.value) break
                     for (cmd in timer.commands.split("\n")) {
                         if (cmd.isNotBlank()) {
-                            transmit(cmd.trim())
-                            delay(300)
+                            if (!isConnected.value) break
+                            transmitThrottled(cmd.trim(), commandIntervalMs.value)
                         }
                     }
                 }
@@ -544,22 +938,17 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         ttsManager.speak(getString(R.string.test_voice_message, getString(R.string.app_name)), true)
     }
 
-    fun soundFolders(): List<String> =
-        AppStorage.baseDir(getApplication()).listFiles()
-            ?.filter { it.isDirectory && it.name != "Logs" }
-            ?.map { it.name }
-            ?.sortedBy { it.lowercase() }
-            ?: emptyList()
+    fun soundFolders(): List<String> = AppStorage.soundFolders(getApplication())
 
     fun createSoundFolder(name: String): Boolean {
         val cleaned = name.trim()
-        if (cleaned.isEmpty() || cleaned == "Logs") return false
+        if (cleaned.isEmpty() || AppStorage.isReservedFolder(cleaned)) return false
         val dir = File(AppStorage.baseDir(getApplication()), cleaned)
         return dir.isDirectory || dir.mkdirs()
     }
 
     fun deleteSoundFolder(name: String) {
-        if (name.isBlank() || name == "Logs") return
+        if (name.isBlank() || AppStorage.isReservedFolder(name)) return
         File(AppStorage.baseDir(getApplication()), name).deleteRecursively()
         var changed = false
         for (index in characters.indices) {
@@ -609,9 +998,32 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun setQuitCommandsSetting(value: String) {
+        quitCommands.value = value
+        settingsRepository.saveQuitCommands(value)
+    }
+
+    private fun markIfQuitCommand(command: String) {
+        if (QuitCommands.matches(command, QuitCommands.parse(quitCommands.value))) {
+            quitRequestedAt = SystemClock.elapsedRealtime()
+        }
+    }
+
+    private fun quitRequestedRecently(): Boolean {
+        if (quitRequestedAt == 0L) return false
+        return SystemClock.elapsedRealtime() - quitRequestedAt <= QUIT_INTENT_WINDOW_MS
+    }
+
     fun setCommandSeparatorSetting(value: String) {
         commandSeparator.value = value
         settingsRepository.saveCommandSeparator(value)
+    }
+
+    fun setCommandIntervalSetting(millis: Int) {
+        val sanitized = millis.coerceIn(0, IntervalFormat.MAX_INTERVAL_MS)
+        commandIntervalMs.value = sanitized
+        settingsRepository.saveCommandIntervalMs(sanitized)
+        restartTiltIfActive()
     }
 
     fun setLogsEnabledSetting(value: Boolean) {
@@ -714,12 +1126,179 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         updateMessage.value = null
     }
 
-    fun exportBackup(uri: Uri) {
+    private fun timestamp(): String =
+        SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).format(Date())
+
+    fun currentBundle(sections: Set<ShareSection>): ShareBundle = ShareBundle(
+        kind = ShareKind.BACKUP,
+        characters = characters.toList(),
+        triggers = triggers.toList(),
+        timers = timers.toList(),
+        macros = macros.toList(),
+        shortcuts = shortcuts.toList(),
+        settings = backupManager.settingsSnapshot()
+    ).filtered(sections)
+
+    fun refreshStorageOptions() {
+        val app = getApplication<Application>()
+        viewModelScope.launch {
+            val available = withContext(Dispatchers.IO) { AppStorage.options(app) }
+            val current = withContext(Dispatchers.IO) { AppStorage.currentOption(app) }
+            storageOptions.clear()
+            storageOptions.addAll(available)
+            currentStorage.value = current
+        }
+    }
+
+    fun storageLabelFor(option: StorageOption): String = getString(
+        when (option.type) {
+            StorageType.DOCUMENTS -> R.string.storage_documents
+            StorageType.APP_INTERNAL -> R.string.storage_app_internal
+            StorageType.REMOVABLE -> R.string.storage_removable
+        }
+    )
+
+    fun storageFreeText(option: StorageOption): String =
+        getString(R.string.storage_free_space, formatBytes(option.freeBytes))
+
+    private fun formatBytes(bytes: Long): String {
+        if (bytes <= 0L) return getString(R.string.storage_free_unknown)
+        val gb = bytes / (1024.0 * 1024.0 * 1024.0)
+        if (gb >= 1.0) {
+            return String.format(Locale.getDefault(), "%.1f GB", gb)
+        }
+        val mb = bytes / (1024.0 * 1024.0)
+        return String.format(Locale.getDefault(), "%.0f MB", mb)
+    }
+
+    fun chooseStorage(option: StorageOption) {
+        val app = getApplication<Application>()
+        viewModelScope.launch {
+            val usable = withContext(Dispatchers.IO) {
+                if (AppStorage.ensureUsable(option.baseDir)) {
+                    AppStorage.select(app, option)
+                    AppStorage.baseDir(app)
+                    true
+                } else {
+                    false
+                }
+            }
+            if (!usable) {
+                backupMessage.value = getString(R.string.storage_not_writable)
+                return@launch
+            }
+            storageChoiceVisible.value = false
+            storageReady.value = true
+            refreshStorageOptions()
+            backupMessage.value = getString(
+                R.string.storage_selected,
+                storageLabelFor(option),
+                option.baseDir.absolutePath
+            )
+        }
+    }
+
+    fun dismissStorageChoice() {
+        val app = getApplication<Application>()
+        storageChoiceVisible.value = false
+        storageReady.value = true
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                AppStorage.markLocationChosen(app)
+                AppStorage.baseDir(app)
+            }
+            refreshStorageOptions()
+        }
+    }
+
+    fun isStorageMigrationRunning(): Boolean = storageMigrationJob?.isActive == true
+
+    fun moveStorageTo(option: StorageOption) {
+        if (isStorageMigrationRunning()) return
+        val app = getApplication<Application>()
+        val from = AppStorage.baseDir(app)
+        val to = option.baseDir
+
+        if (from.absolutePath == to.absolutePath) {
+            backupMessage.value = getString(R.string.storage_same_location)
+            return
+        }
+
+        audioManager.stopAll()
+        logManager.endSession()
+
+        storageMigrationProgress.value = MigrationProgress(0, 0, 0)
+        storageMigrationJob = viewModelScope.launch {
+            val result = try {
+                withContext(Dispatchers.IO) {
+                    storageMigrator.move(from, to) { progress ->
+                        storageMigrationProgress.value = progress
+                    }
+                }
+            } catch (e: CancellationException) {
+                withContext(NonCancellable) {
+                    storageMigrationProgress.value = null
+                    backupMessage.value = getString(R.string.storage_move_cancelled)
+                    resumeLogSessionIfNeeded()
+                }
+                throw e
+            }
+
+            val moved = result == MigrationResult.SUCCESS ||
+                result == MigrationResult.NOTHING_TO_MOVE ||
+                result == MigrationResult.SOURCE_NOT_CLEARED
+
+            if (moved) {
+                withContext(Dispatchers.IO) {
+                    AppStorage.select(app, option)
+                    AppStorage.baseDir(app)
+                }
+                refreshStorageOptions()
+            }
+
+            storageMigrationProgress.value = null
+            backupMessage.value = when (result) {
+                MigrationResult.SUCCESS, MigrationResult.NOTHING_TO_MOVE -> getString(
+                    R.string.storage_move_ok,
+                    storageLabelFor(option),
+                    to.absolutePath
+                )
+                MigrationResult.SOURCE_NOT_CLEARED -> getString(
+                    R.string.storage_move_ok_leftovers,
+                    storageLabelFor(option),
+                    from.absolutePath
+                )
+                MigrationResult.NO_SPACE -> getString(R.string.storage_move_no_space)
+                MigrationResult.DESTINATION_UNUSABLE -> getString(R.string.storage_not_writable)
+                MigrationResult.SAME_LOCATION -> getString(R.string.storage_same_location)
+                MigrationResult.COPY_FAILED -> getString(R.string.storage_move_failed)
+            }
+
+            resumeLogSessionIfNeeded()
+        }
+    }
+
+    private fun resumeLogSessionIfNeeded() {
+        if (!logsEnabled.value || !isConnected.value) return
+        activeCharacter.value?.let { logManager.startSession(it.name, it.host) }
+    }
+
+    fun cancelStorageMigration() {
+        storageMigrationJob?.cancel()
+        storageMigrationProgress.value = null
+    }
+
+    fun exportBundle(uri: Uri, sections: Set<ShareSection>) {
+        if (sections.isEmpty()) {
+            backupMessage.value = getString(R.string.export_nothing_selected)
+            return
+        }
+        val json = ShareFormat.encode(currentBundle(sections), timestamp())
         viewModelScope.launch {
             val ok = withContext(Dispatchers.IO) {
                 try {
                     getApplication<Application>().contentResolver.openOutputStream(uri, "wt")?.use { output ->
-                        output.write(backupManager.exportToJson().toByteArray(Charsets.UTF_8))
+                        output.write(json.toByteArray(Charsets.UTF_8))
                         true
                     } ?: false
                 } catch (e: Exception) {
@@ -732,24 +1311,242 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun importBackup(uri: Uri) {
+    fun openImportFromUri(uri: Uri) {
         viewModelScope.launch {
-            val ok = withContext(Dispatchers.IO) {
-                try {
-                    val json = getApplication<Application>().contentResolver.openInputStream(uri)
-                        ?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }
-                    json != null && backupManager.importFromJson(json)
-                } catch (e: Exception) {
-                    false
-                }
-            }
-            if (ok) {
-                reloadFromStorage()
-            }
-            backupMessage.value = getString(
-                if (ok) R.string.backup_import_ok else R.string.backup_import_failed
-            )
+            val text = withContext(Dispatchers.IO) { shareManager.readText(uri) }
+            openImportFromText(text)
         }
+    }
+
+    fun openImportFromText(text: String?) {
+        val bundle = if (text.isNullOrBlank()) null else ShareFormat.decode(text)
+        if (bundle == null) {
+            backupMessage.value = getString(R.string.import_invalid_file)
+            return
+        }
+        pendingImport.value = bundle
+    }
+
+    fun cancelImport() {
+        pendingImport.value = null
+    }
+
+    fun applyImport(
+        sections: Set<ShareSection>,
+        replace: Boolean,
+        overrideScope: Boolean,
+        scope: String,
+        scopeValue: String
+    ) {
+        val bundle = pendingImport.value ?: return
+        pendingImport.value = null
+
+        if (sections.isEmpty()) {
+            backupMessage.value = getString(R.string.import_nothing_selected)
+            return
+        }
+
+        var selected = bundle.filtered(sections)
+        if (overrideScope) {
+            selected = selected.withScope(scope, scopeValue)
+        }
+
+        if (selected.settings.isNotEmpty()) {
+            backupManager.applySettings(selected.settings)
+        }
+        if (sections.contains(ShareSection.CHARACTERS)) {
+            val idMap = mergeCharacters(selected.characters, replace)
+            selected = selected.remapCharacterScope(idMap)
+        }
+        if (sections.contains(ShareSection.TRIGGERS)) {
+            mergeTriggers(selected.triggers, replace)
+        }
+        if (sections.contains(ShareSection.TIMERS)) {
+            mergeTimers(selected.timers, replace)
+        }
+        if (sections.contains(ShareSection.MACROS)) {
+            mergeMacros(selected.macros, replace)
+        }
+        if (sections.contains(ShareSection.SHORTCUTS)) {
+            mergeShortcuts(selected.shortcuts, replace)
+        }
+
+        if (selected.settings.isNotEmpty()) {
+            reloadFromStorage()
+        } else {
+            restartTimersIfConnected()
+        }
+
+        backupMessage.value = importSummary(selected)
+    }
+
+    private fun mergeCharacters(incoming: List<MudCharacter>, replace: Boolean): Map<String, String> {
+        val idMap = mutableMapOf<String, String>()
+        if (incoming.isEmpty() && !replace) return idMap
+        if (replace) {
+            characters.clear()
+            characters.addAll(incoming)
+        } else {
+            for (item in incoming) {
+                val newId = if (characters.any { it.id == item.id }) {
+                    UUID.randomUUID().toString()
+                } else {
+                    item.id
+                }
+                if (newId != item.id) {
+                    idMap[item.id] = newId
+                }
+                characters.add(item.copy(id = newId))
+            }
+        }
+        repository.saveCharacters(characters)
+        return idMap
+    }
+
+    private fun mergeTriggers(incoming: List<MudTrigger>, replace: Boolean) {
+        if (incoming.isEmpty() && !replace) return
+        if (replace) {
+            triggers.clear()
+            triggers.addAll(incoming)
+        } else {
+            for (item in incoming) {
+                val id = if (triggers.any { it.id == item.id }) UUID.randomUUID().toString() else item.id
+                triggers.add(item.copy(id = id))
+            }
+        }
+        triggerRepository.saveTriggers(triggers)
+    }
+
+    private fun mergeTimers(incoming: List<MudTimer>, replace: Boolean) {
+        if (incoming.isEmpty() && !replace) return
+        if (replace) {
+            timers.clear()
+            timers.addAll(incoming)
+        } else {
+            for (item in incoming) {
+                val id = if (timers.any { it.id == item.id }) UUID.randomUUID().toString() else item.id
+                timers.add(item.copy(id = id))
+            }
+        }
+        timerRepository.saveTimers(timers)
+    }
+
+    private fun mergeMacros(incoming: List<MudMacro>, replace: Boolean) {
+        if (incoming.isEmpty() && !replace) return
+        if (replace) {
+            macros.clear()
+            macros.addAll(incoming)
+        } else {
+            for (item in incoming) {
+                val id = if (macros.any { it.id == item.id }) UUID.randomUUID().toString() else item.id
+                macros.add(item.copy(id = id, name = uniqueMacroName(item.name)))
+            }
+        }
+        macroRepository.saveMacros(macros)
+    }
+
+    private fun mergeShortcuts(incoming: List<MudShortcut>, replace: Boolean) {
+        if (incoming.isEmpty() && !replace) return
+        if (replace) {
+            shortcuts.clear()
+            shortcuts.addAll(incoming)
+        } else {
+            for (item in incoming) {
+                val id = if (shortcuts.any { it.id == item.id }) UUID.randomUUID().toString() else item.id
+                shortcuts.add(item.copy(id = id))
+            }
+        }
+        shortcutRepository.saveShortcuts(shortcuts)
+    }
+
+    private fun uniqueMacroName(name: String): String {
+        val base = name.trim()
+        if (base.isBlank()) return base
+        if (macros.none { it.name.equals(base, ignoreCase = true) }) return base
+        var index = 2
+        while (macros.any { it.name.equals(base + "_" + index, ignoreCase = true) }) {
+            index++
+        }
+        return base + "_" + index
+    }
+
+    private fun quantityText(pluralId: Int, count: Int): String =
+        getApplication<Application>().resources.getQuantityString(pluralId, count, count)
+
+    private fun importSummary(applied: ShareBundle): String {
+        val parts = mutableListOf<String>()
+        if (applied.characters.isNotEmpty()) {
+            parts.add(quantityText(R.plurals.imported_characters, applied.characters.size))
+        }
+        if (applied.triggers.isNotEmpty()) {
+            parts.add(quantityText(R.plurals.imported_triggers, applied.triggers.size))
+        }
+        if (applied.timers.isNotEmpty()) {
+            parts.add(quantityText(R.plurals.imported_timers, applied.timers.size))
+        }
+        if (applied.macros.isNotEmpty()) {
+            parts.add(quantityText(R.plurals.imported_macros, applied.macros.size))
+        }
+        if (applied.shortcuts.isNotEmpty()) {
+            parts.add(quantityText(R.plurals.imported_shortcuts, applied.shortcuts.size))
+        }
+        if (applied.settings.isNotEmpty()) {
+            parts.add(getString(R.string.imported_settings))
+        }
+        if (parts.isEmpty()) return getString(R.string.import_nothing_selected)
+        return getString(R.string.import_summary, parts.joinToString(", "))
+    }
+
+    fun shareCharacter(character: MudCharacter) {
+        shareBundle(
+            ShareBundle(kind = ShareKind.SHARE, characters = listOf(character)),
+            character.name,
+            getString(R.string.share_subject_character, character.name)
+        )
+    }
+
+    fun shareTrigger(trigger: MudTrigger) {
+        shareBundle(
+            ShareBundle(kind = ShareKind.SHARE, triggers = listOf(trigger)),
+            trigger.name,
+            getString(R.string.share_subject_trigger, trigger.name)
+        )
+    }
+
+    fun shareTimer(timer: MudTimer) {
+        val label = getString(R.string.share_timer_label, timer.seconds)
+        shareBundle(
+            ShareBundle(kind = ShareKind.SHARE, timers = listOf(timer)),
+            label,
+            getString(R.string.share_subject_timer, label)
+        )
+    }
+
+    fun shareMacro(macro: MudMacro) {
+        shareBundle(
+            ShareBundle(kind = ShareKind.SHARE, macros = listOf(macro)),
+            macro.name,
+            getString(R.string.share_subject_macro, macro.name)
+        )
+    }
+
+    private fun shareBundle(bundle: ShareBundle, baseName: String, subject: String) {
+        val json = ShareFormat.encode(bundle, timestamp())
+        val intent = shareManager.buildShareIntent(
+            baseName,
+            json,
+            subject,
+            getString(R.string.share_description, subject)
+        )
+        if (intent == null) {
+            backupMessage.value = getString(R.string.share_failed)
+        } else {
+            pendingShareIntent.value = intent
+        }
+    }
+
+    fun clearShareIntent() {
+        pendingShareIntent.value = null
     }
 
     fun clearBackupMessage() {
@@ -765,11 +1562,14 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         triggers.addAll(triggerRepository.loadTriggers())
         macros.clear()
         macros.addAll(macroRepository.loadMacros())
+        shortcuts.clear()
+        shortcuts.addAll(shortcutRepository.loadShortcuts())
 
         manualHost.value = repository.getManualHost()
         manualPort.value = repository.getManualPort()
         manualUseTTS.value = repository.getManualUseTTS()
         manualPlaySounds.value = repository.getManualPlaySounds()
+        manualAutoReconnect.value = repository.getManualAutoReconnect()
 
         encoding.value = settingsRepository.getEncoding()
         MudConnectionManager.setEncoding(encoding.value)
@@ -781,6 +1581,21 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         ttsVolume.value = settingsRepository.getTtsVolume()
         ttsManager.setEngine(ttsEngine.value)
         ttsManager.configure(ttsRate.value, ttsPitch.value, ttsVolume.value, ttsVoice.value)
+
+        commandSeparator.value = settingsRepository.getCommandSeparator()
+        quitCommands.value = settingsRepository.getQuitCommands()
+        commandIntervalMs.value = settingsRepository.getCommandIntervalMs()
+        shortcutPanelEnabled.value = settingsRepository.getShortcutPanelEnabled()
+        tiltTriggerDegrees.value = settingsRepository.getTiltTriggerDegrees()
+        tiltConfirmMs.value = settingsRepository.getTiltConfirmMs()
+        tiltRepeatEnabled.value = settingsRepository.getTiltRepeatEnabled()
+        tiltMapping.clear()
+        for (zone in TiltZones.MAPPABLE_ZONES) {
+            val stored = settingsRepository.getTiltShortcut(zone.name)
+            if (stored.isNotBlank()) {
+                tiltMapping[zone.name] = stored
+            }
+        }
 
         logsEnabled.value = settingsRepository.getLogsEnabled()
         logRetentionDays.value = settingsRepository.getLogRetentionDays()
@@ -836,8 +1651,7 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         soundPackProgress.value = SoundPackProgress(SoundPackStep.DOWNLOADING, 0, totalKnown = false)
         soundPackJob = viewModelScope.launch {
             var resultMessage = getString(R.string.sound_pack_failed)
-            val tempRoot = app.externalCacheDir ?: app.cacheDir
-            val tempZip = File(tempRoot, "soundpack.zip")
+            val tempZip = File(AppStorage.tempDir(app), "soundpack.zip")
             try {
                 val result = withContext(Dispatchers.IO) {
                     work(tempZip, File(AppStorage.baseDir(app), folder))
@@ -920,9 +1734,68 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
         MudConnectionManager.sendMessage(command)
     }
 
+    private suspend fun transmitThrottled(command: String, intervalMs: Int) {
+        outboundMutex.withLock {
+            if (intervalMs > 0 && lastTransmitAt != 0L) {
+                val elapsed = SystemClock.elapsedRealtime() - lastTransmitAt
+                if (elapsed in 0 until intervalMs.toLong()) {
+                    delay(intervalMs - elapsed)
+                }
+            }
+            markIfQuitCommand(command)
+            transmit(command)
+            lastTransmitAt = SystemClock.elapsedRealtime()
+        }
+    }
+
+    private fun sendThrottledSequence(commands: List<String>, intervalMs: Int) {
+        if (commands.isEmpty()) return
+        val job = viewModelScope.launch {
+            for (cmd in commands) {
+                if (!isConnected.value) return@launch
+                transmitThrottled(cmd, intervalMs)
+            }
+        }
+        synchronized(outboundJobs) { outboundJobs.add(job) }
+        job.invokeOnCompletion {
+            synchronized(outboundJobs) { outboundJobs.remove(job) }
+        }
+    }
+
+    private fun cancelOutboundJobs(): Boolean {
+        val jobs = synchronized(outboundJobs) {
+            val copy = outboundJobs.toList()
+            outboundJobs.clear()
+            copy
+        }
+        val hadPending = jobs.any { it.isActive }
+        jobs.forEach { it.cancel() }
+        return hadPending
+    }
+
+    fun stopPendingCommands() {
+        val hadPending = cancelOutboundJobs()
+        postStatusMessage(
+            getString(
+                if (hadPending) R.string.macro_interrupted else R.string.macro_nothing_running
+            )
+        )
+    }
+
+    fun stopCurrentSounds() {
+        audioManager.stopAll()
+        postStatusMessage(getString(R.string.sounds_interrupted))
+    }
+
     fun connectManual() {
         val portInt = manualPort.value.toIntOrNull() ?: 4000
-        repository.saveManualConnection(manualHost.value, manualPort.value, manualUseTTS.value, manualPlaySounds.value)
+        repository.saveManualConnection(
+            manualHost.value,
+            manualPort.value,
+            manualUseTTS.value,
+            manualPlaySounds.value,
+            manualAutoReconnect.value
+        )
 
         val sonsDir = File(AppStorage.baseDir(getApplication()), "Sons")
         if (!sonsDir.exists()) {
@@ -939,27 +1812,33 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
             postConnectCommands = "",
             useTTS = manualUseTTS.value,
             playSounds = manualPlaySounds.value,
-            soundsFolder = "Sons"
+            soundsFolder = "Sons",
+            autoReconnect = manualAutoReconnect.value
         )
 
         connect(manualCharacter)
     }
 
-    fun connect(character: MudCharacter) {
+    fun connect(character: MudCharacter, preserveHistory: Boolean = false) {
+        cancelReconnect()
+        quitRequestedAt = 0L
         activeCharacter.value = character
         currentGameUseTTS.value = character.useTTS
         currentGamePlaySounds.value = character.playSounds
         audioManager.setSoundsFolder(character.soundsFolder)
 
-        gameMessages.clear()
-        namedHistories.clear()
-        lastSentCommand.value = ""
+        if (!preserveHistory) {
+            gameMessages.clear()
+            namedHistories.clear()
+            lastSentCommand.value = ""
+        }
         userJustSentCommand.value = false
         flushNextTTS.value = false
-        isConnected.value = true
+        isConnected.value = false
+        connectionState.value = ConnectionState.CONNECTING
         currentScreen.value = AppScreen.GAME
 
-        if (logsEnabled.value) {
+        if (logsEnabled.value && !preserveHistory) {
             logManager.startSession(character.name, character.host)
         }
 
@@ -974,7 +1853,53 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
 
         MudConnectionManager.connect(getApplication(), character.host, character.port)
 
-        startTimers(character)
+        if (!notificationsAllowed()) {
+            postStatusMessage(getString(R.string.notifications_denied_warning))
+        }
+    }
+
+    private fun notificationsAllowed(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
+        return getApplication<Application>().checkSelfPermission(
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun cancelReconnect() {
+        reconnectJob?.cancel()
+        reconnectJob = null
+        reconnectAttempt = 0
+    }
+
+    private fun scheduleReconnect() {
+        if (currentScreen.value != AppScreen.GAME) return
+        val character = activeCharacter.value ?: return
+        if (!character.autoReconnect) return
+
+        if (reconnectAttempt >= RECONNECT_DELAYS_SECONDS.size) {
+            postStatusMessage(getString(R.string.reconnect_gave_up, RECONNECT_DELAYS_SECONDS.size))
+            reconnectAttempt = 0
+            return
+        }
+
+        val seconds = RECONNECT_DELAYS_SECONDS[reconnectAttempt]
+        reconnectAttempt++
+        val attempt = reconnectAttempt
+
+        postStatusMessage(
+            getString(R.string.reconnect_scheduled, seconds, attempt, RECONNECT_DELAYS_SECONDS.size)
+        )
+
+        reconnectJob?.cancel()
+        reconnectJob = viewModelScope.launch {
+            delay(seconds * 1000L)
+            if (currentScreen.value != AppScreen.GAME) return@launch
+            if (isConnected.value) return@launch
+            postStatusMessage(
+                getString(R.string.reconnect_trying, attempt, RECONNECT_DELAYS_SECONDS.size)
+            )
+            connect(character, preserveHistory = true)
+        }
     }
 
     fun sendMessage(message: String) {
@@ -988,7 +1913,7 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
             flushNextTTS.value = true
 
             if (macroRecordingState.value == MacroRecordingState.RECORDING) {
-                recordedMacroCommands.add(finalCommand)
+                recordCommand(finalCommand)
             }
 
             val invocation = MacroEngine.parseInvocation(finalCommand)
@@ -997,51 +1922,70 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
                 return
             }
 
-            val separator = commandSeparator.value
-            val parts = if (separator.isNotEmpty()) {
-                finalCommand.split(separator).map { it.trim() }.filter { it.isNotEmpty() }
-            } else {
-                emptyList()
-            }
+            val parts = splitBySeparator(finalCommand)
             if (parts.size > 1) {
-                if (logsEnabled.value) {
-                    parts.forEach { logOutgoingMasked(it) }
-                }
-                MudConnectionManager.sendMessage(parts.joinToString("\r\n"))
+                sendThrottledSequence(parts, commandIntervalMs.value)
             } else {
-                transmit(finalCommand)
+                sendThrottledSequence(listOf(finalCommand), commandIntervalMs.value)
             }
+        }
+    }
+
+    private fun macroIntervalMs(macro: MudMacro): Int =
+        IntervalFormat.effectiveMillis(macro.intervalMs, commandIntervalMs.value)
+
+    private fun findMacro(name: String): MudMacro? {
+        val character = activeCharacter.value
+        return macros.firstOrNull {
+            it.enabled &&
+                it.name.equals(name, ignoreCase = true) &&
+                (character == null || scopeMatches(it.scope, it.scopeValue, character))
+        }
+    }
+
+    private fun splitBySeparator(command: String): List<String> {
+        val separator = commandSeparator.value
+        if (separator.isEmpty()) return emptyList()
+        return command.split(separator).map { it.trim() }.filter { it.isNotEmpty() }
+    }
+
+    private fun recordCommand(command: String) {
+        val invocation = MacroEngine.parseInvocation(command)
+        if (invocation != null) {
+            val macro = findMacro(invocation.name)
+            if (macro != null) {
+                val expanded = MacroEngine.expandCommands(macro.commands, invocation.argsString)
+                if (expanded.isNotEmpty()) {
+                    recordedMacroCommands.addAll(expanded)
+                    return
+                }
+            }
+        }
+
+        val parts = splitBySeparator(command)
+        if (parts.size > 1) {
+            recordedMacroCommands.addAll(parts)
+        } else {
+            recordedMacroCommands.add(command)
         }
     }
 
     private fun executeMacro(invocation: MacroEngine.Invocation) {
-        val character = activeCharacter.value
-        val macro = macros.firstOrNull {
-            it.enabled &&
-                it.name.equals(invocation.name, ignoreCase = true) &&
-                (character == null || scopeMatches(it.scope, it.scopeValue, character))
-        }
+        val macro = findMacro(invocation.name)
         if (macro == null) {
             postStatusMessage(getString(R.string.macro_not_found, invocation.name))
             return
         }
-        sendExpandedMacroCommands(MacroEngine.expandCommands(macro.commands, invocation.argsString))
-    }
-
-    private fun sendExpandedMacroCommands(commands: List<String>) {
-        if (commands.isEmpty()) return
-        viewModelScope.launch {
-            for (cmd in commands) {
-                if (!isConnected.value) return@launch
-                transmit(cmd)
-                delay(300)
-            }
-        }
+        sendThrottledSequence(
+            MacroEngine.expandCommands(macro.commands, invocation.argsString),
+            macroIntervalMs(macro)
+        )
     }
 
     fun reconnect() {
         val character = activeCharacter.value ?: return
-        connect(character)
+        cancelReconnect()
+        connect(character, preserveHistory = true)
     }
 
     fun clearHistory() {
@@ -1049,14 +1993,18 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun leaveGame() {
+        cancelReconnect()
+        setTiltModeActive(false)
         autoLoginJob?.cancel()
         autoLoginJob = null
+        cancelOutboundJobs()
         stopTimers()
         ttsManager.stop()
         audioManager.stopAll()
         logManager.endSession()
         MudConnectionManager.disconnect(getApplication())
         isConnected.value = false
+        connectionState.value = ConnectionState.DISCONNECTED
         lastSentCommand.value = ""
         userJustSentCommand.value = false
         currentScreen.value = AppScreen.MAIN
@@ -1065,10 +2013,18 @@ class MudViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         super.onCleared()
+        tiltSensor.stop()
+        toneFeedback.release()
         MudConnectionManager.disconnect(getApplication())
         ttsManager.shutdown()
         audioManager.releaseAll()
         logManager.endSession()
         logManager.shutdown()
+    }
+
+    private companion object {
+        const val MIN_TILT_REPEAT_MS = 300
+        val RECONNECT_DELAYS_SECONDS = listOf(5, 10, 20, 30, 60)
+        const val QUIT_INTENT_WINDOW_MS = 30_000L
     }
 }

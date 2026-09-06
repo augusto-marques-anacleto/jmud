@@ -2,4 +2,5 @@
 <paths>
     <external-files-path name="updates" path="." />
     <files-path name="internal_updates" path="." />
+    <cache-path name="shared_items" path="share/" />
 </paths>

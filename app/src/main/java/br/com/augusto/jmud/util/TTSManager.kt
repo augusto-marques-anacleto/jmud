@@ -18,14 +18,29 @@ class TTSManager(private val context: Context) : TextToSpeech.OnInitListener {
     }
 
     override fun onInit(status: Int) {
-        if (status == TextToSpeech.SUCCESS) {
-            val locale = Locale.Builder().setLanguage("pt").setRegion("BR").build()
-            val result = tts?.setLanguage(locale)
-            if (result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED) {
-                isInitialized = true
-                applyConfig()
+        if (status != TextToSpeech.SUCCESS) return
+
+        val candidates = listOf(
+            Locale.Builder().setLanguage("pt").setRegion("BR").build(),
+            Locale.Builder().setLanguage("pt").build(),
+            Locale.getDefault()
+        )
+        for (candidate in candidates) {
+            val result = try {
+                tts?.setLanguage(candidate)
+            } catch (e: Exception) {
+                null
+            }
+            if (result != null &&
+                result != TextToSpeech.LANG_MISSING_DATA &&
+                result != TextToSpeech.LANG_NOT_SUPPORTED
+            ) {
+                break
             }
         }
+
+        isInitialized = true
+        applyConfig()
     }
 
     private fun applyConfig() {

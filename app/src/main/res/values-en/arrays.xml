@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="direction_shortcut_labels">
+        <item>northwest</item>
+        <item>north</item>
+        <item>northeast</item>
+        <item>west</item>
+        <item>look</item>
+        <item>east</item>
+        <item>southwest</item>
+        <item>south</item>
+        <item>southeast</item>
+        <item>up</item>
+        <item>down</item>
+    </string-array>
+    <string-array name="direction_shortcut_commands">
+        <item>nw</item>
+        <item>n</item>
+        <item>ne</item>
+        <item>w</item>
+        <item>look</item>
+        <item>e</item>
+        <item>sw</item>
+        <item>s</item>
+        <item>se</item>
+        <item>up</item>
+        <item>down</item>
+    </string-array>
+</resources>
